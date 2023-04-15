@@ -1,17 +1,10 @@
 def main [
-    input: string # tar.gz file containing container to be pushed to repository
-    ...tags: string # Tags to be added to pushed container
-    --no-latest-tag # Don't add latest tag
+    input: string # tar.gz file containing container image to be pushed to repository
+    ...tags: string # Tags to be added to pushed container image
+    --no-latest-tag # Don't add "latest" tag to list of tags
     --no-drone-tag # Don't add tag calculated from DRONE_BUILD_NUMBER and DRONE_COMMIT_SHA
     --no-github-tag # Don't add tag calculated from GItHUB_RUN_NUMBER and GITHUB_SHA
 ] {
-    env
-    print $input
-    print $tags
-    print $no_latest_tag
-    print $no_drone_tag
-    print $no_github_tag
-
     if not ($input | path exists) {
         print $"($input) does not exist!"
         exit 1
@@ -72,19 +65,33 @@ def main [
         exit 1
     }
 
-    print "XXX"
+    alias podman = podman --log-level error
+
     $env.PLUGIN_PASSWORD | podman login --username $env.PLUGIN_USERNAME --password-stdin $env.PLUGIN_REGISTRY
-    print "YYY"
-    let old_image = (podman load --input $input | str trim | parse "Loaded image: {image}" | get 0.image)
-    print "ZZZ"
+
+    let load_result = (do {podman load --input $input} | complete)
+    if $load_result.exit_code != 0 {
+        print $load_result.stderr
+        exit 1
+    }
+    let old_image = $load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image
+
     print $old_image
     podman images
     $tags | each {
         |tag|
         let new_image = $"($env.PLUGIN_REGISTRY)/($env.PLUGIN_REPOSITORY):($tag)"
         print $new_image
-        podman tag $old_image $new_image
-        podman push $new_image
+        let tag_result = (do { podman tag $old_image $new_image } | complete)
+        if $tag_result.exit_code != 0 {
+            print $tag_result.stderr
+            exit 1
+        }
+        let push_result = (do { podman push $new_image } | complete)
+        if $push_result.exit_code != 0 {
+            print $push_result.stderr
+            exit 1
+        }
     }
     podman images
     podman logout $env.PLUGIN_REGISTRY
