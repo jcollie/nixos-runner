@@ -65,7 +65,7 @@ def main [
         exit 1
     }
 
-    alias podman = podman --log-level error
+    alias podman = ^podman --log-level error
 
     $env.PLUGIN_PASSWORD | podman login --username $env.PLUGIN_USERNAME --password-stdin $env.PLUGIN_REGISTRY
 
