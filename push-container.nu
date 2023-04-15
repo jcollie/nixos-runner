@@ -75,7 +75,7 @@ def main [
     print "XXX"
     $env.PLUGIN_PASSWORD | podman login --username $env.PLUGIN_USERNAME --password-stdin $env.PLUGIN_REGISTRY
     print "YYY"
-    let old_image = (podman load --input $input | parse "Loaded image: {image}" | get 0.image)
+    let old_image = (podman load --input $input | str trim | parse "Loaded image: {image}" | get 0.image)
     print "ZZZ"
     print $old_image
     podman images
