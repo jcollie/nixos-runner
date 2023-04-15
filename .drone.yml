@@ -1,0 +1,36 @@
+---
+kind: secret
+name: docker_username
+get:
+  path: docker
+  name: username
+---
+kind: secret
+name: docker_password
+get:
+  path: docker
+  name: password
+---
+kind: pipeline
+type: kubernetes
+name: publish
+steps:
+  - name: build
+    image: docker.io/jcollie/nixos-runner:latest
+    pull: always
+    commands:
+      - nix build .#nixos-runner
+      - echo -n "${plugin_password}" | podman login --username "${plugin_username}" --password-stdin "${plugin_registry}"
+      - image=$(podman load --input result | sed -n -e "s/Loaded image:.\\(.*\\)/\\1/p")
+      - podman images
+      - podman tag "${image}" "${plugin_registry}/${plugin_repository}:${DRONE_BUILD_NUMBER}-${DRONE_COMMIT_SHA:0:8}"
+      - podman tag "${image}" "${plugin_registry}/${plugin_repository}:latest"
+      - podman images
+      - podman logout "${plugin_registry}"
+    settings:
+      registry: docker.io
+      repository: jcollie/nixos-runner
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
