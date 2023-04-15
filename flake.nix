@@ -369,9 +369,10 @@
                 script = pkgs.writeTextFile
                   {
                     name = "push-container";
-                    text = ''
-                      #!${pkgs.nushell}/bin/nu
-                    '' + (builtins.readFile ./push-container.nu);
+                    text = lib.concatStringsSep "\n" [
+                      "#!${pkgs.nushell}/bin/nu"
+                      (builtins.readFile ./push-container.nu)
+                    ];
                     executable = true;
                   };
               in

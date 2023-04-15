@@ -72,16 +72,20 @@ def main [
         exit 1
     }
 
+    print "XXX"
     $env.PLUGIN_PASSWORD | podman login --username $env.PLUGIN_USERNAME --password-stdin $env.PLUGIN_REGISTRY
+    print "YYY"
     let old_image = (podman load --input $input | parse "Loaded image: {image}" | get 0.image)
+    print "ZZZ"
     print $old_image
     podman images
     $tags | each {
         |tag|
         let new_image = $"($env.PLUGIN_REGISTRY)/($env.PLUGIN_REPOSITORY):($tag)"
+        print $new_image
         podman tag $old_image $new_image
         podman push $new_image
     }
     podman images
-    podman logout "''${PLUGIN_REGISTRY}"
+    podman logout $env.PLUGIN_REGISTRY
 }
