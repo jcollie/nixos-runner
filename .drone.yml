@@ -20,13 +20,7 @@ steps:
     pull: always
     commands:
       - nix build .#nixos-runner
-      - echo -n "${plugin_password}" | podman login --username "${plugin_username}" --password-stdin "${plugin_registry}"
-      - image=$(podman load --input result | sed -n -e "s/Loaded image:.\\(.*\\)/\\1/p")
-      - podman images
-      - podman tag "${image}" "${plugin_registry}/${plugin_repository}:${DRONE_BUILD_NUMBER}-${DRONE_COMMIT_SHA:0:8}"
-      - podman tag "${image}" "${plugin_registry}/${plugin_repository}:latest"
-      - podman images
-      - podman logout "${plugin_registry}"
+      - nix run .#push-container -- result
     settings:
       registry: docker.io
       repository: jcollie/nixos-runner

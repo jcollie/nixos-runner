@@ -362,6 +362,27 @@
                 };
               };
           };
+          apps = {
+            push-container =
+              let
+                script = pkgs.writeScript "push-container" ''
+                  set | grep -i plugin
+                  set | grep -i DRONE
+                  ls -l "''${1}"
+                  echo -n "''${PLUGIN_PASSWORD}" | podman login --username "''${PLUGIN_USERNAME}" --password-stdin "''${PLUGIN_REGISTRY}"
+                  image=''$(podman load --input "''${1}" | sed -n -e "s/Loaded image:.\\(.*\\)/\\1/p")
+                  podman images
+                  podman tag "''${image}" "''${PLUGIN_REGISTRY}/''${PLUGIN_REPOSITORY}:''${DRONE_BUILD_NUMBER}-''${DRONE_COMMIT_SHA:0:8}"
+                  podman tag "''${image}" "''${PLUGIN_REGISTRY}/''${PLUGIN_REPOSITORY}:latest"
+                  podman images
+                  podman logout "''${PLUGIN_REGISTRY}"
+                '';
+              in
+              {
+                type = "app";
+                program = "${script}";
+              };
+          };
         }
       )
     );
