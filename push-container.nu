@@ -1,6 +1,8 @@
 def main [
     input: string # tar.gz file containing container image to be pushed to repository
     ...tags: string # Tags to be added to pushed container image
+    --registry: string = "" # container registry
+    --repository: string = "" # container repository
     --no-latest-tag # Don't add "latest" tag to list of tags
     --no-drone-tag # Don't add tag calculated from DRONE_BUILD_NUMBER and DRONE_COMMIT_SHA
     --no-github-tag # Don't add tag calculated from GItHUB_RUN_NUMBER and GITHUB_SHA
@@ -48,39 +50,72 @@ def main [
 
     print $tags
 
-    if ($env | get -i PLUGIN_PASSWORD | is-empty) {
-        print "No password specified!"
-        exit 1
-    }
-    if ($env | get -i PLUGIN_USERNAME | is-empty) {
-        print "No username specified!"
-        exit 1
-    }
-    if ($env | get -i PLUGIN_REGISTRY | is-empty) {
-        print "No registry specified!"
-        exit 1
-    }
-    if ($env | get -i PLUGIN_REPOSITORY | is-empty) {
-        print "No repositiory specified!"
-        exit 1
-    }
+    let auth = {username: null, password: null}
+
+    let auth = (
+        if (
+            (not ($env | get -i GITHUB_ACTOR | is-empty))
+            and
+            (not ($env | get -i GITHUB_TOKEN | is-empty))
+        ) {
+            {username: $env.GITHUB_ACTOR, password: $env.GITHUB_TOKEN}
+        } else if (
+            (not ($env | get -i PLUGIN_USERNAME | is-empty))
+            and
+            (not ($env | get -i PLUGIN_PASSWORD | is-empty))
+        ) {
+            {username: $env.PLUGIN_USERNAME, password: $env.PLUGIN_PASSWORD}
+        } else {
+            print "Unable to determine authentication parameters!"
+            exit 1
+        }
+    )
+
+    print $auth
+
+    let registry = (
+        if ($registry | is-empty) {
+            if not ($env | get -i PLUGIN_REGISTRY | is-empty) {
+                $env.PLUGIN_REGISTRY
+            } else {
+                print "No registry specified!"
+                exit 1
+            }
+        } else {
+            $registry
+        }
+    )
+
+    let repositiory = (
+        if ($repository | is-empty) {
+            if not ($env | get -i PLUGIN_REPOSITIORY | is-empty) {
+                $env.PLUGIN_REPOSITIORY
+            } else {
+                print "No repository specified!"
+                exit 1
+            }
+        } else {
+            $repository
+        }
+    )
 
     alias podman = ^podman --log-level error
 
-    $env.PLUGIN_PASSWORD | podman login --username $env.PLUGIN_USERNAME --password-stdin $env.PLUGIN_REGISTRY
+    $auth.password | podman login --username $auth.username --password-stdin $registry
 
     let load_result = (do {podman load --input $input} | complete)
     if $load_result.exit_code != 0 {
         print $load_result.stderr
         exit 1
     }
-    let old_image = $load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image
+
+    let old_image = ($load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image)
 
     print $old_image
     podman images
     $tags | each {
         |tag|
-        let new_image = $"($env.PLUGIN_REGISTRY)/($env.PLUGIN_REPOSITORY):($tag)"
+        let new_image = $"($registry)/($repository):($tag)"
         print $new_image
         let tag_result = (do { podman tag $old_image $new_image } | complete)
         if $tag_result.exit_code != 0 {
@@ -94,5 +129,5 @@ def main [
         }
     }
     podman images
-    podman logout $env.PLUGIN_REGISTRY
+    podman logout $registry
 }
