@@ -6,6 +6,6 @@ jobs:
     runs-on: ubuntu-latest
     container: docker.io/jcollie/nixos-runner:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.5.2
       - run: nix -L build .#nixos-runner
       - run: nix run .#push-container -- result --registry ghcr.io --repository jcollie/nixos-runner
