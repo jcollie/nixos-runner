@@ -101,7 +101,7 @@ def main [
         }
     )
 
-    #alias podman = ^podman --log-level error
+    alias podman = ^podman --log-level error --cgroup-manager=cgroupfs
 
     print "AAA"
     $auth.password | podman login --username $auth.username --password-stdin $registry
