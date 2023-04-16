@@ -31,7 +31,7 @@
                   pkgs.coreutils-full
                   pkgs.gawk
                   pkgs.git
-                  pkgs.glibc.bin
+                  pkgs.glibc
                   pkgs.gnugrep
                   pkgs.gnused
                   pkgs.nix
@@ -359,7 +359,7 @@
                       "/root/.nix-profile/share/man"
                       "/nix/var/nix/profiles/default/share/man"
                     ]}"
-                    "LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib"
+                    "LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath defaultPkgs}"
                     "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
