@@ -39,6 +39,8 @@
                   pkgs.nushell
                   pkgs.podman
                   pkgs.stdenv.cc.cc.lib
+
+                  self.packages.${system}.push-container
                 ];
 
                 flake-registry = null;
@@ -365,19 +367,27 @@
                   ];
                 };
               };
+            push-container = pkgs.writeTextFile {
+              name = "push-container";
+              destination = "/bin/push-container";
+              text = lib.concatStringsSep "\n" [
+                "#!${pkgs.nushell}/bin/nu"
+                (builtins.readFile ./push-container.nu)
+              ];
+              executable = true;
+            };
           };
           apps = {
             push-container =
               let
-                script = pkgs.writeTextFile
-                  {
-                    name = "push-container";
-                    text = lib.concatStringsSep "\n" [
-                      "#!${pkgs.nushell}/bin/nu"
-                      (builtins.readFile ./push-container.nu)
-                    ];
-                    executable = true;
-                  };
+                script = pkgs.writeTextFile {
+                  name = "push-container";
+                  text = lib.concatStringsSep "\n" [
+                    "#!${pkgs.nushell}/bin/nu"
+                    (builtins.readFile ./push-container.nu)
+                  ];
+                  executable = true;
+                };
               in
               {
                 type = "app";
