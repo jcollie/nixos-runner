@@ -4,7 +4,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: docker.io/jcollie/nixos-runner:13-daa4f8d9
+    container: docker.io/jcollie/nixos-runner:14-9b8a7bca
     steps:
       - run: ldd /__e/node16/bin/node
       - uses: actions/checkout@v3
