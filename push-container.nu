@@ -7,6 +7,8 @@ def main [
     --no-drone-tag # Don't add tag calculated from DRONE_BUILD_NUMBER and DRONE_COMMIT_SHA
     --no-github-tag # Don't add tag calculated from GItHUB_RUN_NUMBER and GITHUB_SHA
 ] {
+    env
+
     if not ($input | path exists) {
         print $"($input) does not exist!"
         exit 1
