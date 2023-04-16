@@ -349,14 +349,15 @@
                   Env = [
                     "USER=root"
                     "PATH=${lib.concatStringsSep ":" [
-                  "/root/.nix-profile/bin"
-                  "/nix/var/nix/profiles/default/bin"
-                  "/nix/var/nix/profiles/default/sbin"
-                ]}"
+                      "/root/.nix-profile/bin"
+                      "/nix/var/nix/profiles/default/bin"
+                      "/nix/var/nix/profiles/default/sbin"
+                    ]}"
                     "MANPATH=${lib.concatStringsSep ":" [
-                  "/root/.nix-profile/share/man"
-                  "/nix/var/nix/profiles/default/share/man"
-                ]}"
+                      "/root/.nix-profile/share/man"
+                      "/nix/var/nix/profiles/default/share/man"
+                    ]}"
+                    "LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib"
                     "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
