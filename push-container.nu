@@ -120,7 +120,7 @@ def main [
             print $push_result.stderr
             exit 1
         }
-        print $"Pushed $(new_image)"
+        print $"Pushed ($new_image)"
     }
 
     podman logout $registry
