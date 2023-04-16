@@ -101,16 +101,17 @@ def main [
         }
     )
 
-    alias podman = ^podman --log-level error
+    #alias podman = ^podman --log-level error
 
+    print "AAA"
     $auth.password | podman login --username $auth.username --password-stdin $registry
-
+    print "BBB"
     let load_result = (do {podman load --input $input} | complete)
     if $load_result.exit_code != 0 {
         print $load_result.stderr
         exit 1
     }
-
+    print "CCC"
     let old_image = ($load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image)
 
     print $old_image
