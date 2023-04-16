@@ -378,21 +378,10 @@
             };
           };
           apps = {
-            push-container =
-              let
-                script = pkgs.writeTextFile {
-                  name = "push-container";
-                  text = lib.concatStringsSep "\n" [
-                    "#!${pkgs.nushell}/bin/nu"
-                    (builtins.readFile ./push-container.nu)
-                  ];
-                  executable = true;
-                };
-              in
-              {
-                type = "app";
-                program = "${script}";
-              };
+            push-container = {
+              type = "app";
+              program = "${self.packages.${system}.push-container}/bin/push-container";
+            };
           };
         }
       )

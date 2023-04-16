@@ -6,11 +6,6 @@ jobs:
     runs-on: ubuntu-latest
     container: docker.io/jcollie/nixos-runner:latest
     steps:
-      - run: ldd /__e/node16/bin/node
-      - run: echo "ld-library-path=${LD_LIBRARY_PATH}" >> $GITHUB_OUTPUT
-        id: ld-library-path
       - uses: actions/checkout@v3
-        env:
-          LD_LIBRARY_PATH: ${{ steps.ld-library-path.outputs.ld-library-path }}
       - run: nix -L build .#nixos-runner
       - run: nix run .#push-container -- result --registry ghcr.io --repository jcollie/nixos-runner

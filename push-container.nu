@@ -25,23 +25,23 @@ def main [
     }
 
     let tags = if (
-        (not $no_drone_tag)
-         and
-        (not ($env | get -i DRONE_BUILD_NUMBER | is-empty))
-         and
-        (not ($env | get -i DRONE_COMMIT_SHA | is-empty))
-    ) {
-        $tags | append $"($env.DRONE_BUILD_NUMBER)-($env.DRONE_COMMIT_SHA | str substring 0..8)"
-    } else {
-        $tags
-    }
-
-    let tags = if (
         (not $no_github_tag)
          and
         (not ($env | get -i GITHUB_RUN_NUMBER | is-empty))
          and
         (not ($env | get -i GITHUB_SHA | is-empty))
+    ) {
+        $tags | append $"($env.GITHUB_RUN_NUMBER)-($env.GITHUB_SHA | str substring 0..8)"
+    } else {
+        $tags
+    }
+
+    let tags = if (
+        (not $no_drone_tag)
+         and
+        (not ($env | get -i DRONE_BUILD_NUMBER | is-empty))
+         and
+        (not ($env | get -i DRONE_COMMIT_SHA | is-empty))
     ) {
         $tags | append $"($env.DRONE_BUILD_NUMBER)-($env.DRONE_COMMIT_SHA | str substring 0..8)"
     } else {
