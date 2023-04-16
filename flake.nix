@@ -359,7 +359,7 @@
                       "/root/.nix-profile/share/man"
                       "/nix/var/nix/profiles/default/share/man"
                     ]}"
-                    "LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath defaultPkgs}"
+                    "LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [pkgs.glibc pkgs.stdenv.cc.cc.lib]}"
                     "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
