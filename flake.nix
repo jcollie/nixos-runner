@@ -33,6 +33,7 @@
                   pkgs.git
                   pkgs.gnugrep
                   pkgs.gnused
+                  pkgs.glibc.bin
                   pkgs.nix
                   pkgs.nodejs-16_x
                   pkgs.nushell
