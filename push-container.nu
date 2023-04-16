@@ -7,8 +7,6 @@ def main [
     --no-drone-tag # Don't add tag calculated from DRONE_BUILD_NUMBER and DRONE_COMMIT_SHA
     --no-github-tag # Don't add tag calculated from GItHUB_RUN_NUMBER and GITHUB_SHA
 ] {
-    env
-
     if not ($input | path exists) {
         print $"($input) does not exist!"
         exit 1
@@ -50,8 +48,6 @@ def main [
         $tags
     }
 
-    print $tags
-
     let auth = {username: null, password: null}
 
     let auth = (
@@ -72,8 +68,6 @@ def main [
             exit 1
         }
     )
-
-    print $auth
 
     let registry = (
         if ($registry | is-empty) {
@@ -101,25 +95,21 @@ def main [
         }
     )
 
-    alias podman = ^podman --log-level error --cgroup-manager=cgroupfs
+    alias podman = ^podman --log-level error
 
-    print "AAA"
     $auth.password | podman login --username $auth.username --password-stdin $registry
-    print "BBB"
-    let load_result = (do {podman load --input $input} | complete)
+
+    let load_result = (do { podman load --input $input } | complete)
     if $load_result.exit_code != 0 {
         print $load_result.stderr
         exit 1
     }
-    print "CCC"
+
     let old_image = ($load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image)
 
-    print $old_image
-    podman images
     $tags | each {
         |tag|
         let new_image = $"($registry)/($repository):($tag)"
-        print $new_image
         let tag_result = (do { podman tag $old_image $new_image } | complete)
         if $tag_result.exit_code != 0 {
             print $tag_result.stderr
@@ -130,7 +120,8 @@ def main [
             print $push_result.stderr
             exit 1
         }
+        print $"Pushed $(new_image)"
     }
-    podman images
+
     podman logout $registry
 }
