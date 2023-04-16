@@ -86,10 +86,10 @@ def main [
         }
     )
 
-    let repositiory = (
+    let repository = (
         if ($repository | is-empty) {
-            if not ($env | get -i PLUGIN_REPOSITIORY | is-empty) {
-                $env.PLUGIN_REPOSITIORY
+            if not ($env | get -i PLUGIN_REPOSITORY | is-empty) {
+                $env.PLUGIN_REPOSITORY
             } else {
                 print "No repository specified!"
                 exit 1
