@@ -47,6 +47,7 @@
                   pkgs.podman
                   pkgs.stdenv.cc.cc.lib
 
+                  self.packages.${system}.login-script
                   self.packages.${system}.push-container
                 ];
 
