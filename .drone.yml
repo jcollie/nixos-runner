@@ -27,8 +27,8 @@ steps:
       - podman load --input result | sed -n -e "s/Loaded image:.\\(.*\\)/\\1/p" > loaded-image
       - cat loaded-image
       - podman images
-      - podman tag "$$(<loaded-image)" "$${PLUGIN_REGISTRY}/${PLUGIN_REPOSITORY}:$${DRONE_BUILD_NUMBER}-$${DRONE_COMMIT_SHA:0:8}"
-      - podman tag "$$(<loaded-image)" "$${PLUGIN_REGISTRY}/${PLUGIN_REPOSITORY}:latest"
+      - podman tag "$$(<loaded-image)" "$${PLUGIN_REGISTRY}/$${PLUGIN_REPOSITORY}:$${DRONE_BUILD_NUMBER}-$${DRONE_COMMIT_SHA:0:8}"
+      - podman tag "$$(<loaded-image)" "$${PLUGIN_REGISTRY}/$${PLUGIN_REPOSITORY}:latest"
       - podman images
       - podman push "$${PLUGIN_REGISTRY}/$${PLUGIN_REPOSITORY}:$${DRONE_BUILD_NUMBER}-$${DRONE_COMMIT_SHA:0:8}"
       - podman push "$${PLUGIN_REGISTRY}/$${PLUGIN_REPOSITORY}:latest"
