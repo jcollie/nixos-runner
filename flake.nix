@@ -16,6 +16,9 @@
         let
           pkgs = import nixpkgs {
             inherit system;
+            config.permittedInsecurePackages = [
+              "nodejs-16.20.2"
+            ];
           };
           lib = pkgs.lib;
         in
