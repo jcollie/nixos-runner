@@ -5,7 +5,7 @@ def main [
     --repository: string = "" # container repository
     --no-latest-tag # Don't add "latest" tag to list of tags
     --no-drone-tag # Don't add tag calculated from DRONE_BUILD_NUMBER and DRONE_COMMIT_SHA
-    --no-github-tag # Don't add tag calculated from GItHUB_RUN_NUMBER and GITHUB_SHA
+    --no-github-tag # Don't add tag calculated from GITHUB_RUN_NUMBER and GITHUB_SHA
 ] {
     if not ($input | path exists) {
         print $"($input) does not exist!"
@@ -63,6 +63,12 @@ def main [
             (not ($env | get -i PLUGIN_PASSWORD | is-empty))
         ) {
             {username: $env.PLUGIN_USERNAME, password: $env.PLUGIN_PASSWORD}
+        } else if (
+            (not ($env | get -i USERNAME | is-empty))
+            and
+            (not ($env | get -i PASSWORD | is-empty))
+        ) {
+            {username: $env.USERNAME, password: $env.PASSWORD}
         } else {
             print "Unable to determine authentication parameters!"
             exit 1
@@ -73,6 +79,8 @@ def main [
         if ($registry | is-empty) {
             if not ($env | get -i PLUGIN_REGISTRY | is-empty) {
                 $env.PLUGIN_REGISTRY
+            } else if not ($env | get -i REGISTRY | is-empty) {
+                $env.REGISTRY
             } else {
                 print "No registry specified!"
                 exit 1
@@ -86,6 +94,8 @@ def main [
         if ($repository | is-empty) {
             if not ($env | get -i PLUGIN_REPOSITORY | is-empty) {
                 $env.PLUGIN_REPOSITORY
+            } else if not ($env | get -i REPOSITORY | is-empty) {
+                $env.REPOSITORY
             } else {
                 print "No repository specified!"
                 exit 1
