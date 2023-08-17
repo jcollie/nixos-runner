@@ -20,7 +20,7 @@ steps:
     pull: always
     commands:
       - nix build .#nixos-runner
-      - nix run .#push-container -- result
+      # - nix run .#push-container -- result
       - podman load --input result | sed -n -e "s/Loaded image:.\\(.*\\)/\\1/p" > loaded-image
       - cat loaded-image
       - podman images
