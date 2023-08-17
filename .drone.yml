@@ -20,7 +20,7 @@ steps:
     pull: always
     commands:
       # - set
-      - nix run .#login
+      # - nix run .#login
       - echo -n "$${PLUGIN_PASSWORD}" | podman login --username $${PLUGIN_USERNAME} --password-stdin $${PLUGIN_REGISTRY}
       - nix build .#nixos-runner
       # - nix run .#push-container -- result
