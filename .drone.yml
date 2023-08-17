@@ -19,15 +19,17 @@ steps:
     image: docker.io/jcollie/nixos-runner:latest
     pull: always
     commands:
+      - set
+      - echo -n "${PASSWORD}" | podman login --username ${USERNAME} --password-stdin ${REGISTRY}
       - nix build .#nixos-runner
       # - nix run .#push-container -- result
       - podman load --input result | sed -n -e "s/Loaded image:.\\(.*\\)/\\1/p" > loaded-image
       - cat loaded-image
       - podman images
-      - podman tag "$(<loaded-image)" "${REGISTRY}/${REPOSITORY}:${GITHUB_RUN_NUMBER}-${GITHUB_SHA:0:8}"
+      - podman tag "$(<loaded-image)" "${REGISTRY}/${REPOSITORY}:${DRONE_BUILD_NUMBER}-${DRONE_COMMIT_SHA:0:8}"
       - podman tag "$(<loaded-image)" "${REGISTRY}/${REPOSITORY}:latest"
       - podman images
-      - podman push "${REGISTRY}/${REPOSITORY}:${GITHUB_RUN_NUMBER}-${GITHUB_SHA:0:8}"
+      - podman push "${REGISTRY}/${REPOSITORY}:${DRONE_BUILD_NUMBER}-${DRONE_COMMIT_SHA:0:8}"
       - podman push "${REGISTRY}/${REPOSITORY}:latest"
       - podman logout "${REGISTRY}"
     settings:
