@@ -383,22 +383,19 @@
               ];
               executable = true;
             };
+            login-script = pkgs.writeScriptBin "login-script" ''
+              echo -n "''${PLUGIN_PASSWORD}" | ${pkgs.podman}/bin/podman login --username "''${PLUGIN_USERNAME}" --password-stdin "''${PLUGIN_REGISTRY}"
+            '';
           };
           apps = {
             push-container = {
               type = "app";
               program = "${self.packages.${system}.push-container}/bin/push-container";
             };
-            login =
-              let
-                program = pkgs.writeScript "program" ''
-                  echo -n "''${PLUGIN_PASSWORD}" | ${pkgs.podman}/bin/podman login --username "''${PLUGIN_USERNAME}" --password-stdin "''${PLUGIN_REGISTRY}"
-                '';
-              in
-              {
-                type = "app";
-                program = "${program}";
-              };
+            login = {
+              type = "app";
+              program = "${self.packages.${system}.login-script}/bin/login-script";
+            };
           };
         }
       )
