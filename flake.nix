@@ -40,6 +40,7 @@
                   pkgs.glibc
                   pkgs.gnugrep
                   pkgs.gnused
+                  pkgs.iputils
                   pkgs.nix
                   pkgs.nodejs-16_x
                   pkgs.nushell
