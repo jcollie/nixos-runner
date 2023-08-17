@@ -20,19 +20,19 @@ steps:
     pull: always
     commands:
       - set
-      - echo "${PLUGIN_USERNAME}" "${USERNAME}"
-      - echo -n "${PASSWORD}" | podman login --username ${USERNAME} --password-stdin ${REGISTRY}
+      - echo "$${PLUGIN_USERNAME}" "$${USERNAME}"
+      - echo -n "$${PLUGIN_PASSWORD}" | podman login --username $${PLUGIN_USERNAME} --password-stdin $${PLUGIN_REGISTRY}
       - nix build .#nixos-runner
       # - nix run .#push-container -- result
       - podman load --input result | sed -n -e "s/Loaded image:.\\(.*\\)/\\1/p" > loaded-image
       - cat loaded-image
       - podman images
-      - podman tag "$(<loaded-image)" "${REGISTRY}/${REPOSITORY}:${DRONE_BUILD_NUMBER}-${DRONE_COMMIT_SHA:0:8}"
-      - podman tag "$(<loaded-image)" "${REGISTRY}/${REPOSITORY}:latest"
+      - podman tag "$$(<loaded-image)" "$${PLUGIN_REGISTRY}/${PLUGIN_REPOSITORY}:$${DRONE_BUILD_NUMBER}-$${DRONE_COMMIT_SHA:0:8}"
+      - podman tag "$$(<loaded-image)" "$${PLUGIN_REGISTRY}/${PLUGIN_REPOSITORY}:latest"
       - podman images
-      - podman push "${REGISTRY}/${REPOSITORY}:${DRONE_BUILD_NUMBER}-${DRONE_COMMIT_SHA:0:8}"
-      - podman push "${REGISTRY}/${REPOSITORY}:latest"
-      - podman logout "${REGISTRY}"
+      - podman push "$${PLUGIN_REGISTRY}/${PLUGIN_REPOSITORY}:${DRONE_BUILD_NUMBER}-${DRONE_COMMIT_SHA:0:8}"
+      - podman push "$${PLUGIN_REGISTRY}/${PLUGIN_REPOSITORY}:latest"
+      - podman logout "$${PLUGIN_REGISTRY}"
     env:
       REGISTRY: docker.io
       REPOSITORY: jcollie/nixos-runner
