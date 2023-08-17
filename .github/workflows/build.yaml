@@ -5,9 +5,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: docker.io/jcollie/nixos-runner:latest
+    env:
+      REGISTRY: ghcr.io
+      REPOSITORY: jcollie/nixos-runner
     steps:
       - uses: actions/checkout@v3
-      - run: nix -L build .#nixos-runner
-      - run: nix run .#push-container -- result --registry ghcr.io --repository jcollie/nixos-runner
+      - run: set
+      - run: nix build -L .#nixos-runner
+      - run: echo -n "${GITHUB_TOKEN}" | podman login --username ${GITHUB_ACTOR} --password-stdin ghcr.io
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: podman load --input result | sed -n -e "s/Loaded image:.\\(.*\\)/loaded-image=\\1/p" >> $GITHUB_OUTPUT
+        id: podman-load-image
+      - run: podman images
+      - run: podman tag "${IMAGE}" "${REGISTRY}/${REPOSITORY}:${GITHUB_RUN_NUMBER}-${GITHUB_SHA:0:8}"
+        env:
+          IMAGE: ${{ steps.podman-load-image.outputs.loaded-image }}
+      - run: podman tag "${IMAGE}" "${REGISTRY}/${REPOSITORY}:latest"
+        env:
+          IMAGE: ${{ steps.podman-load-image.outputs.loaded-image }}
+      - run: podman images
+      - run: podman push "${REGISTRY}/${REPOSITORY}:${GITHUB_RUN_NUMBER}-${GITHUB_SHA:0:8}"
+      - run: podman push "${REGISTRY}/${REPOSITORY}:latest"
+      - run: podman logout "${REGISTRY}"
+
+      # - run: nix run .#push-container -- result --registry ghcr.io --repository jcollie/nixos-runner
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
