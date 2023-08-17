@@ -28,7 +28,10 @@
                 channelURL = "https://nixos.org/channels/nixos-unstable";
                 defaultPkgs = [
                   pkgs.bashInteractive
+                  pkgs.bind.dnsutils
                   pkgs.coreutils-full
+                  pkgs.curl
+                  pkgs.dogdns
                   pkgs.gawk
                   pkgs.git
                   pkgs.glibc
