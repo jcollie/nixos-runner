@@ -56,22 +56,22 @@ def main [
             and
             (not ($env | get -i PASSWORD | is-empty))
         ) {
-            {username: $env.USERNAME, password: $env.PASSWORD}
             print "Got username and password from USERNAME and PASSWORD"
+            {username: $env.USERNAME, password: $env.PASSWORD}
         } else if (
             (not ($env | get -i PLUGIN_USERNAME | is-empty))
             and
             (not ($env | get -i PLUGIN_PASSWORD | is-empty))
         ) {
-            {username: $env.PLUGIN_USERNAME, password: $env.PLUGIN_PASSWORD}
             print "Got username and password from PLUGIN_USERNAME and PLUGIN_PASSWORD"
+            {username: $env.PLUGIN_USERNAME, password: $env.PLUGIN_PASSWORD}
         } else if (
             (not ($env | get -i GITHUB_ACTOR | is-empty))
             and
             (not ($env | get -i GITHUB_TOKEN | is-empty))
         ) {
-            {username: $env.GITHUB_ACTOR, password: $env.GITHUB_TOKEN}
             print "Got username and password from GITHUB_ACTOR and GITHUB_TOKEN"
+            {username: $env.GITHUB_ACTOR, password: $env.GITHUB_TOKEN}
         } else {
             print "Unable to determine authentication parameters!"
             exit 1
