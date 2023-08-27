@@ -108,7 +108,7 @@ def main [
         }
     )
 
-    alias podman = ^podman --log-level error
+    alias podman = ^podman --log-level debug
 
     $auth.password | podman login --username $auth.username --password-stdin $registry
 
