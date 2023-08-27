@@ -47,6 +47,10 @@
                   pkgs.podman
                   pkgs.stdenv.cc.cc.lib
 
+                  (pkgs.docker_24.override {
+                    clientOnly = true;
+                  })
+
                   self.packages.${system}.login-script
                   self.packages.${system}.push-container
                 ];
