@@ -1,3 +1,4 @@
+#!@nushell@
 def main [
     input: string # tar.gz file containing container image to be pushed to repository
     ...tags: string # Tags to be added to pushed container image
@@ -84,6 +85,12 @@ def main [
                 $env.PLUGIN_REGISTRY
             } else if not ($env | get -i REGISTRY | is-empty) {
                 $env.REGISTRY
+            } else if (
+                (not ($env | get -i GITHUB_SERVER_URL | is-empty))
+                and
+                (not ($env | get -i GITHUB_ACTOR | is-empty))
+            ) {
+                $"($env.GITHUB_SERVER_URL)/($env.GITHUB_ACTOR)"
             } else {
                 print "No registry specified!"
                 exit 1
@@ -108,11 +115,11 @@ def main [
         }
     )
 
-    alias podman = ^podman --log-level debug
+    alias client = ^@client@ --log-level debug
 
-    $auth.password | podman login --username $auth.username --password-stdin $registry
+    $auth.password | client login --username $auth.username --password-stdin $registry
 
-    let load_result = (do { podman load --input $input } | complete)
+    let load_result = (do { client load --input $input } | complete)
     if $load_result.exit_code != 0 {
         print $load_result.stderr
         exit 1
@@ -123,12 +130,12 @@ def main [
     $tags | each {
         |tag|
         let new_image = $"($registry)/($repository):($tag)"
-        let tag_result = (do { podman tag $old_image $new_image } | complete)
+        let tag_result = (do { client tag $old_image $new_image } | complete)
         if $tag_result.exit_code != 0 {
             print $tag_result.stderr
             exit 1
         }
-        let push_result = (do { podman push $new_image } | complete)
+        let push_result = (do { client push $new_image } | complete)
         if $push_result.exit_code != 0 {
             print $push_result.stderr
             exit 1
@@ -136,5 +143,5 @@ def main [
         print $"Pushed ($new_image)"
     }
 
-    podman logout $registry
+    client logout $registry
 }

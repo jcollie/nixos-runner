@@ -21,8 +21,12 @@
             ];
           };
           lib = pkgs.lib;
+          docker-client = pkgs.docker_24.override {
+            clientOnly = true;
+          };
         in
         {
+
           packages = {
             nixos-runner =
               let
@@ -47,12 +51,11 @@
                   pkgs.podman
                   pkgs.stdenv.cc.cc.lib
 
-                  (pkgs.docker_24.override {
-                    clientOnly = true;
-                  })
+                  docker-client
 
                   self.packages.${system}.login-script
-                  self.packages.${system}.push-container
+                  self.packages.${system}.podman-push-container
+                  self.packages.${system}.docker-push-container
                 ];
 
                 flake-registry = null;
@@ -379,13 +382,34 @@
                   ];
                 };
               };
-            push-container = pkgs.writeTextFile {
-              name = "push-container";
-              destination = "/bin/push-container";
-              text = lib.concatStringsSep "\n" [
-                "#!${pkgs.nushell}/bin/nu"
-                (builtins.readFile ./push-container.nu)
-              ];
+            podman-push-container = pkgs.writeTextFile {
+              name = "podman-push-container";
+              destination = "/bin/podman-push-container";
+              text = builtins.replaceStrings
+                [
+                  "@nushell"
+                  "@client@"
+                ]
+                [
+                  "${pkgs.nushell}/bin/nu"
+                  "${pkgs.podman}/bin/podman"
+                ]
+                (builtins.readFile ./push-container.nu);
+              executable = true;
+            };
+            docker-push-container = pkgs.writeTextFile {
+              name = "docker-push-container";
+              destination = "/bin/docker-push-container";
+              text = builtins.replaceStrings
+                [
+                  "@nushell"
+                  "@client@"
+                ]
+                [
+                  "${pkgs.nushell}/bin/nu"
+                  "${docker-client}/bin/docker"
+                ]
+                (builtins.readFile ./push-container.nu);
               executable = true;
             };
             login-script = pkgs.writeScriptBin "login-script" ''
