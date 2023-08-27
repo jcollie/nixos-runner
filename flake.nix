@@ -387,7 +387,7 @@
               destination = "/bin/podman-push-container";
               text = builtins.replaceStrings
                 [
-                  "@nushell"
+                  "@nushell@"
                   "@client@"
                 ]
                 [
@@ -402,7 +402,7 @@
               destination = "/bin/docker-push-container";
               text = builtins.replaceStrings
                 [
-                  "@nushell"
+                  "@nushell@"
                   "@client@"
                 ]
                 [
