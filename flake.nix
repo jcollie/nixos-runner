@@ -55,9 +55,9 @@
 
                   docker-client
 
-                  self.packages.${system}.login-script
                   self.packages.${system}.podman-push-container
                   self.packages.${system}.docker-push-container
+                  self.packages.${system}.regctl-push-container
                 ];
 
                 flake-registry = null;
@@ -414,18 +414,36 @@
                 (builtins.readFile ./push-container.nu);
               executable = true;
             };
-            login-script = pkgs.writeScriptBin "login-script" ''
-              echo -n "''${PLUGIN_PASSWORD}" | ${pkgs.podman}/bin/podman login --username "''${PLUGIN_USERNAME}" --password-stdin "''${PLUGIN_REGISTRY}"
-            '';
+            regctl-push-container = pkgs.writeTextFile {
+              name = "regctl-push-container";
+              destination = "/bin/regctl-push-container";
+              text = builtins.replaceStrings
+                [
+                  "@nushell@"
+                  "@regctl@"
+                  "@gzip@"
+                ]
+                [
+                  "${pkgs.nushell}/bin/nu"
+                  "${pkgs.regctl}/bin/regctl"
+                  "${pkgs.gzip}/bin/gzip"
+                ]
+                (builtins.readFile ./regctl-push-container.nu);
+              executable = true;
+            };
           };
           apps = {
-            push-container = {
+            podman-push-container = {
               type = "app";
-              program = "${self.packages.${system}.push-container}/bin/push-container";
+              program = "${self.packages.${system}.podman-push-container}/bin/podman-push-container";
             };
-            login = {
+            docker-push-container = {
               type = "app";
-              program = "${self.packages.${system}.login-script}/bin/login-script";
+              program = "${self.packages.${system}.docker-push-container}/bin/docker-push-container";
+            };
+            regctl-push-container = {
+              type = "app";
+              program = "${self.packages.${system}.regctl-push-container}/bin/regctl-push-container";
             };
           };
         }
