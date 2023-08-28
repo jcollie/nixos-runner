@@ -44,6 +44,7 @@
                   pkgs.glibc
                   pkgs.gnugrep
                   pkgs.gnused
+                  pkgs.gzip
                   pkgs.iputils
                   pkgs.nix
                   pkgs.nodejs-16_x
