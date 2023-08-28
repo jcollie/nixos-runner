@@ -49,6 +49,7 @@
                   pkgs.nodejs-16_x
                   pkgs.nushell
                   pkgs.podman
+                  pkgs.regctl
                   pkgs.stdenv.cc.cc.lib
 
                   docker-client
