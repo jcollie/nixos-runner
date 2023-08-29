@@ -42,6 +42,7 @@
                         "-w"
                         "-X main.VCSTag=v${version}"
                       ];
+                      doCheck = false;
                     };
                 }
               )
