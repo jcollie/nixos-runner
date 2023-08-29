@@ -19,6 +19,38 @@
             config.permittedInsecurePackages = [
               "nodejs-16.20.2"
             ];
+            overlays = [
+              (
+                self: super: {
+                  regclient =
+                    let
+                      pname = "regclient";
+                      version = "0.5.1+";
+                      src = pkgs.fetchFromGitHub {
+                        owner = "regclient";
+                        repo = "regclient";
+                        rev = "72df49963a17092138854c5d9d7943deac1dde6b";
+                        hash = "sha256-9k1VXtaHTF1GMIDs5qGzJkqPZa+ZKrWes+LakVKaQ38=";
+                      };
+                      vendorHash = "sha256-j+XidIgjJ5uw1d4OXRl3pjiW5Hvy7WqNM0KdVWMvWls=";
+                    in
+                    super.buildGoModule {
+                      inherit pname version src vendorHash;
+                      inherit (super.regclient) meta outputs postInstall;
+                      ldflags = [
+                        "-s"
+                        "-w"
+                        "-X main.VCSTag=v${version}"
+                      ];
+                    };
+                  # super.regclient.overrideAttrs (
+                  #   old: {
+                  #     inherit pname version src vendorHash;
+                  #   }
+                  # );
+                }
+              )
+            ];
           };
           lib = pkgs.lib;
           docker-client = pkgs.docker_24.override {

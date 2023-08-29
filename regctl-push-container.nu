@@ -125,11 +125,11 @@ def main [
 
     regctl registry login $registry --user $auth.username --pass $auth.password
 
-    print "decompressing image: start"
+    # print "decompressing image: start"
 
-    open $input | gzip --decompress | save --force --progress $"($input).tar"
+    # open $input | gzip --decompress | save --force --progress $"($input).tar"
 
-    print "decompressing image: stop"
+    # print "decompressing image: stop"
 
     # let load_result = (do { regctl load --input $input } | complete)
     # if $load_result.exit_code != 0 {
@@ -144,7 +144,7 @@ def main [
         if $item.index == 0 {
             let new_image = $"($registry)/($repository):($item.item)"
             print $"Pushing ($new_image)"
-            regctl image import $new_image $"($input).tar"
+            regctl image import $new_image $input
             # let tag_result = (do { regctl image import $new_image $"($input).tar" } | complete)
             # if $tag_result.exit_code != 0 {
             #     print $tag_result.stderr
