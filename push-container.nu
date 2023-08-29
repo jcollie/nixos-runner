@@ -2,6 +2,8 @@
 def main [
     input: string # tar.gz file containing container image to be pushed to repository
     ...tags: string # Tags to be added to pushed container image
+    --username: string = "" # username
+    --password: string = "" # password
     --registry: string = "" # container registry
     --repository: string = "" # container repository
     --no-latest-tag # Don't add "latest" tag to list of tags
@@ -15,12 +17,6 @@ def main [
 
     let tags = if not ($env | get -i PLUGIN_TAGS | is-empty) {
         $tags | append ($env.PLUGIN_TAGS | split row ',' | str trim)
-    } else {
-        $tags
-    }
-
-    let tags = if (not $no_latest_tag) {
-        $tags | append "latest"
     } else {
         $tags
     }
@@ -49,10 +45,19 @@ def main [
         $tags
     }
 
+    let tags = if (not $no_latest_tag) {
+        $tags | append "latest"
+    } else {
+        $tags
+    }
+
     let auth = {username: null, password: null}
 
     let auth = (
-        if (
+        if not ($username | is-empty) and ($password | is-empty) {
+            print "Got username and password from command line"
+            {username: $username, password: $password}
+        } else if (
             (not ($env | get -i USERNAME | is-empty))
             and
             (not ($env | get -i PASSWORD | is-empty))
@@ -98,7 +103,7 @@ def main [
         } else {
             $registry
         }
-    )
+    ) | parse --regex "(?:https?://)?(?P<rest>.*)" | get 0.rest
 
     let repository = (
         if ($repository | is-empty) {
@@ -115,33 +120,51 @@ def main [
         }
     )
 
-    alias client = ^@client@ --log-level debug
+    alias regctl = ^@regctl@ --verbosity warning
+    alias gzip = ^@gzip@
 
-    $auth.password | client login --username $auth.username --password-stdin $registry
+    regctl version
+    regctl registry login $registry --user $auth.username --pass $auth.password
 
-    let load_result = (do { client load --input $input } | complete)
-    if $load_result.exit_code != 0 {
-        print $load_result.stderr
-        exit 1
+    # print "decompressing image: start"
+
+    # open $input | gzip --decompress | save --force --progress $"($input).tar"
+
+    # print "decompressing image: stop"
+
+    # let load_result = (do { regctl load --input $input } | complete)
+    # if $load_result.exit_code != 0 {
+    #     print $load_result.stderr
+    #     exit 1
+    # }
+
+    # let old_image = ($load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image)
+
+    $tags | enumerate | each {
+        |item|
+        if $item.index == 0 {
+            let new_image = $"($registry)/($repository):($item.item)"
+            print $"Pushing ($new_image)"
+            regctl image import $new_image $input
+            # let tag_result = (do { regctl image import $new_image $"($input).tar" } | complete)
+            # if $tag_result.exit_code != 0 {
+            #     print $tag_result.stderr
+            #     exit 1
+            # }
+            print $"Pushed ($new_image)"
+        } else {
+            let old_image = $"($registry)/($repository):($tags | get 0)"
+            let new_image = $"($registry)/($repository):($item.item)"
+            print $"Copying ($old_image) ($new_image)"
+            regctl image copy $old_image $new_image
+            # let tag_result = (do { regctl image copy $old_image $new_image } | complete)
+            # if $tag_result.exit_code != 0 {
+            #     print $tag_result.stderr
+            #     exit 1
+            # }
+            print $"Copied ($old_image) ($new_image)"
+        }
     }
 
-    let old_image = ($load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image)
-
-    $tags | each {
-        |tag|
-        let new_image = $"($registry)/($repository):($tag)"
-        let tag_result = (do { client tag $old_image $new_image } | complete)
-        if $tag_result.exit_code != 0 {
-            print $tag_result.stderr
-            exit 1
-        }
-        let push_result = (do { client push $new_image } | complete)
-        if $push_result.exit_code != 0 {
-            print $push_result.stderr
-            exit 1
-        }
-        print $"Pushed ($new_image)"
-    }
-
-    client logout $registry
+    regctl registry logout $registry
 }

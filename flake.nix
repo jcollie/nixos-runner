@@ -83,9 +83,9 @@
 
                   docker-client
 
-                  self.packages.${system}.podman-push-container
-                  self.packages.${system}.docker-push-container
-                  self.packages.${system}.regctl-push-container
+                  # self.packages.${system}.podman-push-container
+                  # self.packages.${system}.docker-push-container
+                  self.packages.${system}.push-container
                 ];
 
                 flake-registry = null;
@@ -412,66 +412,64 @@
                   ];
                 };
               };
-            podman-push-container = pkgs.writeTextFile {
-              name = "podman-push-container";
-              destination = "/bin/podman-push-container";
-              text = builtins.replaceStrings
-                [
-                  "@nushell@"
-                  "@client@"
-                ]
-                [
-                  "${pkgs.nushell}/bin/nu"
-                  "${pkgs.podman}/bin/podman"
-                ]
-                (builtins.readFile ./push-container.nu);
-              executable = true;
-            };
-            docker-push-container = pkgs.writeTextFile {
-              name = "docker-push-container";
-              destination = "/bin/docker-push-container";
-              text = builtins.replaceStrings
-                [
-                  "@nushell@"
-                  "@client@"
-                ]
-                [
-                  "${pkgs.nushell}/bin/nu"
-                  "${docker-client}/bin/docker"
-                ]
-                (builtins.readFile ./push-container.nu);
-              executable = true;
-            };
-            regctl-push-container = pkgs.writeTextFile {
-              name = "regctl-push-container";
-              destination = "/bin/regctl-push-container";
+            # podman-push-container = pkgs.writeTextFile {
+            #   name = "podman-push-container";
+            #   destination = "/bin/podman-push-container";
+            #   text = builtins.replaceStrings
+            #     [
+            #       "@nushell@"
+            #       "@client@"
+            #     ]
+            #     [
+            #       "${pkgs.nushell}/bin/nu"
+            #       "${pkgs.podman}/bin/podman"
+            #     ]
+            #     (builtins.readFile ./push-container.nu);
+            #   executable = true;
+            # };
+            # docker-push-container = pkgs.writeTextFile {
+            #   name = "docker-push-container";
+            #   destination = "/bin/docker-push-container";
+            #   text = builtins.replaceStrings
+            #     [
+            #       "@nushell@"
+            #       "@client@"
+            #     ]
+            #     [
+            #       "${pkgs.nushell}/bin/nu"
+            #       "${docker-client}/bin/docker"
+            #     ]
+            #     (builtins.readFile ./push-container.nu);
+            #   executable = true;
+            # };
+            push-container = pkgs.writeTextFile {
+              name = "push-container";
+              destination = "/bin/push-container";
               text = builtins.replaceStrings
                 [
                   "@nushell@"
                   "@regctl@"
-                  "@gzip@"
                 ]
                 [
                   "${pkgs.nushell}/bin/nu"
                   "${pkgs.regctl}/bin/regctl"
-                  "${pkgs.gzip}/bin/gzip"
                 ]
-                (builtins.readFile ./regctl-push-container.nu);
+                (builtins.readFile ./push-container.nu);
               executable = true;
             };
           };
           apps = {
-            podman-push-container = {
+            # podman-push-container = {
+            #   type = "app";
+            #   program = "${self.packages.${system}.podman-push-container}/bin/podman-push-container";
+            # };
+            # docker-push-container = {
+            #   type = "app";
+            #   program = "${self.packages.${system}.docker-push-container}/bin/docker-push-container";
+            # };
+            push-container = {
               type = "app";
-              program = "${self.packages.${system}.podman-push-container}/bin/podman-push-container";
-            };
-            docker-push-container = {
-              type = "app";
-              program = "${self.packages.${system}.docker-push-container}/bin/docker-push-container";
-            };
-            regctl-push-container = {
-              type = "app";
-              program = "${self.packages.${system}.regctl-push-container}/bin/regctl-push-container";
+              program = "${self.packages.${system}.push-container}/bin/push-container";
             };
           };
         }
