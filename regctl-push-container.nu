@@ -120,7 +120,7 @@ def main [
         }
     )
 
-    alias regctl = ^@regctl@ --verbosity debug
+    alias regctl = ^@regctl@ --verbosity warning
     alias gzip = ^@gzip@
 
     regctl version
