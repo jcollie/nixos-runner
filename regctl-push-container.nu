@@ -120,9 +120,10 @@ def main [
         }
     )
 
-    alias regctl = ^@regctl@ --verbosity info
+    alias regctl = ^@regctl@ --verbosity debug
     alias gzip = ^@gzip@
 
+    regctl version
     regctl registry login $registry --user $auth.username --pass $auth.password
 
     # print "decompressing image: start"
