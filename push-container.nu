@@ -17,6 +17,8 @@ def main [
 
     let tags = if not ($env | get -i PLUGIN_TAGS | is-empty) {
         $tags | append ($env.PLUGIN_TAGS | split row ',' | str trim)
+    } else if not ($env | get -i INPUT_TAGS | is-empty) {
+        $tags | append ($env.INPUT_TAGS | split row ',' | str trim)
     } else {
         $tags
     }
@@ -72,6 +74,13 @@ def main [
             print "Got username and password from PLUGIN_USERNAME and PLUGIN_PASSWORD"
             {username: $env.PLUGIN_USERNAME, password: $env.PLUGIN_PASSWORD}
         } else if (
+            (not ($env | get -i INPUT_USERNAME | is-empty))
+            and
+            (not ($env | get -i INPUT_PASSWORD | is-empty))
+        ) {
+            print "Got username and password from INPUT_USERNAME and INPUT_PASSWORD"
+            {username: $env.INPUT_USERNAME, password: $env.INPUT_PASSWORD}
+        } else if (
             (not ($env | get -i GITHUB_ACTOR | is-empty))
             and
             (not ($env | get -i GITHUB_TOKEN | is-empty))
@@ -88,6 +97,8 @@ def main [
         if ($registry | is-empty) {
             if not ($env | get -i PLUGIN_REGISTRY | is-empty) {
                 $env.PLUGIN_REGISTRY
+            } else if not ($env | get -i INPUT_REGISTRY | is-empty) {
+                $env.INPUT_REGISTRY
             } else if not ($env | get -i REGISTRY | is-empty) {
                 $env.REGISTRY
             } else if (
@@ -109,6 +120,8 @@ def main [
         if ($repository | is-empty) {
             if not ($env | get -i PLUGIN_REPOSITORY | is-empty) {
                 $env.PLUGIN_REPOSITORY
+            } else if not ($env | get -i INPUT_REPOSITORY | is-empty) {
+                $env.INPUT_REPOSITORY
             } else if not ($env | get -i REPOSITORY | is-empty) {
                 $env.REPOSITORY
             } else {
@@ -123,22 +136,7 @@ def main [
     alias regctl = ^@regctl@ --verbosity warning
     alias gzip = ^@gzip@
 
-    regctl version
     regctl registry login $registry --user $auth.username --pass $auth.password
-
-    # print "decompressing image: start"
-
-    # open $input | gzip --decompress | save --force --progress $"($input).tar"
-
-    # print "decompressing image: stop"
-
-    # let load_result = (do { regctl load --input $input } | complete)
-    # if $load_result.exit_code != 0 {
-    #     print $load_result.stderr
-    #     exit 1
-    # }
-
-    # let old_image = ($load_result.stdout | str trim | parse "Loaded image: {image}" | get 0.image)
 
     $tags | enumerate | each {
         |item|
@@ -146,22 +144,12 @@ def main [
             let new_image = $"($registry)/($repository):($item.item)"
             print $"Pushing ($new_image)"
             regctl image import $new_image $input
-            # let tag_result = (do { regctl image import $new_image $"($input).tar" } | complete)
-            # if $tag_result.exit_code != 0 {
-            #     print $tag_result.stderr
-            #     exit 1
-            # }
             print $"Pushed ($new_image)"
         } else {
             let old_image = $"($registry)/($repository):($tags | get 0)"
             let new_image = $"($registry)/($repository):($item.item)"
             print $"Copying ($old_image) ($new_image)"
             regctl image copy $old_image $new_image
-            # let tag_result = (do { regctl image copy $old_image $new_image } | complete)
-            # if $tag_result.exit_code != 0 {
-            #     print $tag_result.stderr
-            #     exit 1
-            # }
             print $"Copied ($old_image) ($new_image)"
         }
     }
