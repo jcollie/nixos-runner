@@ -10,8 +10,8 @@ jobs:
       - run: set
       - run: nix build -L .#nixos-runner
       - run: nix run .#push-container -- result
-        secrets:
-          registry: ghcr.io/${{ github.repository_owner }}
-          repository: nixos-runner
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+        env:
+          REGISTRY: ghcr.io/${{ github.repository_owner }}
+          REPOSITORY: nixos-runner
+          USERNAME: ${{ github.actor }}
+          PASSWORD: ${{ github.token }}
