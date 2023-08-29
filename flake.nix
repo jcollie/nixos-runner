@@ -43,11 +43,6 @@
                         "-X main.VCSTag=v${version}"
                       ];
                     };
-                  # super.regclient.overrideAttrs (
-                  #   old: {
-                  #     inherit pname version src vendorHash;
-                  #   }
-                  # );
                 }
               )
             ];
