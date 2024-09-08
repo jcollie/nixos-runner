@@ -67,6 +67,8 @@
         };
         git = pkgs.git.override {
           perlSupport = false;
+          pythonSupport = false;
+          svnSupport = false;
           sendEmailSupport = false;
           withManual = false;
           withSsh = true;
