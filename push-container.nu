@@ -113,7 +113,7 @@ def main [
         } else {
             $registry
         }
-    ) | parse --regex "(?:https?://)?(?P<rest>.*)" | get 0.rest
+    ) | from url | get 0.rest
 
     let repository = (
         if ($repository | is-empty) {
@@ -130,7 +130,7 @@ def main [
         } else {
             $repository
         }
-    )
+    ) | url parse | url join
 
 
     regctl registry login $registry --user $auth.username --pass $auth.password
