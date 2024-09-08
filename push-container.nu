@@ -113,7 +113,7 @@ def main [
         } else {
             $registry
         }
-    ) | url parse | url join
+    )
 
     let repository = (
         if ($repository | is-empty) {
