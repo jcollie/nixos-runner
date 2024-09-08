@@ -3,7 +3,8 @@ on:
   - push
 jobs:
   build:
-    runs-on: docker.io/jcollie/nixos-runner:latest
+    runs-on: ubuntu-24.04
+    container: docker.io/jcollie/nixos-runner:latest
     steps:
       - uses: actions/checkout@v4
       - run: set
