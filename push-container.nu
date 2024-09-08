@@ -1,4 +1,3 @@
-#!@nushell@
 def main [
     input: string # tar.gz file containing container image to be pushed to repository
     ...tags: string # Tags to be added to pushed container image
@@ -133,8 +132,6 @@ def main [
         }
     )
 
-    alias regctl = ^@regctl@ --verbosity warning
-    alias gzip = ^@gzip@
 
     regctl registry login $registry --user $auth.username --pass $auth.password
 

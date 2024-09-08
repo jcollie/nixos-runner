@@ -8,471 +8,456 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
+    lix-module = {
+      url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }@inputs:
-    (flake-utils.lib.eachDefaultSystem
-      (system:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-            config.permittedInsecurePackages = [
-              "nodejs-16.20.2"
+  outputs = {
+    self,
+    flake-utils,
+    lix-module,
+    nixpkgs,
+  }: (
+    flake-utils.lib.eachDefaultSystem
+    (
+      system: let
+        pkgs = import nixpkgs {
+          inherit system;
+          imports = [
+            lix-module.nixosModules.default
+          ];
+          nix.package = pkgs.lix;
+
+          # config.permittedInsecurePackages = [
+          #   "nodejs-16.20.2"
+          # ];
+          overlays = [
+            # (
+            #   self: super: {
+            #     regclient = let
+            #       pname = "regclient";
+            #       version = "0.5.1+";
+            #       src = pkgs.fetchFromGitHub {
+            #         owner = "regclient";
+            #         repo = "regclient";
+            #         rev = "72df49963a17092138854c5d9d7943deac1dde6b";
+            #         hash = "sha256-9k1VXtaHTF1GMIDs5qGzJkqPZa+ZKrWes+LakVKaQ38=";
+            #       };
+            #       vendorHash = "sha256-j+XidIgjJ5uw1d4OXRl3pjiW5Hvy7WqNM0KdVWMvWls=";
+            #     in
+            #       super.buildGoModule {
+            #         inherit pname version src vendorHash;
+            #         inherit (super.regclient) meta outputs postInstall;
+            #         ldflags = [
+            #           "-s"
+            #           "-w"
+            #           "-X main.VCSTag=v${version}"
+            #         ];
+            #         doCheck = false;
+            #       };
+            #   }
+            # )
+          ];
+        };
+        lib = pkgs.lib;
+        docker-client = pkgs.docker_26.override {
+          clientOnly = true;
+        };
+      in {
+        packages = {
+          nixos-runner = let
+            bundleNixpkgs = true;
+            channelName = "nixpkgs";
+            channelURL = "https://nixos.org/channels/nixos-unstable";
+            defaultPkgs = [
+              pkgs.bashInteractive
+              pkgs.bind.dnsutils
+              pkgs.coreutils-full
+              pkgs.curl
+              pkgs.dogdns
+              pkgs.gawk
+              pkgs.git
+              pkgs.glibc
+              pkgs.gnugrep
+              pkgs.gnused
+              pkgs.gzip
+              pkgs.iputils
+              pkgs.less
+              pkgs.lix
+              # pkgs.nix
+              pkgs.nodejs_20
+              pkgs.nushell
+              pkgs.more
+              pkgs.podman
+              pkgs.regctl
+              pkgs.stdenv.cc.cc.lib
+              pkgs.which
+
+              docker-client
+
+              self.packages.${system}.push-container
             ];
-            overlays = [
-              (
-                self: super: {
-                  regclient =
-                    let
-                      pname = "regclient";
-                      version = "0.5.1+";
-                      src = pkgs.fetchFromGitHub {
-                        owner = "regclient";
-                        repo = "regclient";
-                        rev = "72df49963a17092138854c5d9d7943deac1dde6b";
-                        hash = "sha256-9k1VXtaHTF1GMIDs5qGzJkqPZa+ZKrWes+LakVKaQ38=";
-                      };
-                      vendorHash = "sha256-j+XidIgjJ5uw1d4OXRl3pjiW5Hvy7WqNM0KdVWMvWls=";
-                    in
-                    super.buildGoModule {
-                      inherit pname version src vendorHash;
-                      inherit (super.regclient) meta outputs postInstall;
-                      ldflags = [
-                        "-s"
-                        "-w"
-                        "-X main.VCSTag=v${version}"
-                      ];
-                      doCheck = false;
+
+            flake-registry = null;
+
+            users =
+              {
+                root = {
+                  uid = 0;
+                  shell = "${pkgs.bashInteractive}/bin/bash";
+                  home = "/root";
+                  gid = 0;
+                  groups = ["root"];
+                  description = "System administrator";
+                };
+                nobody = {
+                  uid = 65534;
+                  shell = "${pkgs.shadow}/bin/nologin";
+                  home = "/var/empty";
+                  gid = 65534;
+                  groups = ["nobody"];
+                  description = "Unprivileged account (don't use!)";
+                };
+              }
+              // lib.listToAttrs (
+                map
+                (
+                  n: {
+                    name = "nixbld${toString n}";
+                    value = {
+                      uid = 30000 + n;
+                      gid = 30000;
+                      groups = ["nixbld"];
+                      description = "Nix build user ${toString n}";
                     };
-                }
-              )
-            ];
-          };
-          lib = pkgs.lib;
-          docker-client = pkgs.docker_24.override {
-            clientOnly = true;
-          };
-        in
-        {
+                  }
+                )
+                (lib.lists.range 1 32)
+              );
 
-          packages = {
-            nixos-runner =
+            groups = {
+              root.gid = 0;
+              nixbld.gid = 30000;
+              nobody.gid = 65534;
+            };
+
+            userToPasswd = (
+              data: {
+                uid,
+                gid ? 65534,
+                home ? "/var/empty",
+                description ? "",
+                shell ? "/bin/false",
+                ...
+              }: "${data}:x:${toString uid}:${toString gid}:${description}:${home}:${shell}"
+            );
+
+            passwdContents = (
+              lib.concatStringsSep "\n"
+              (lib.attrValues (lib.mapAttrs userToPasswd users))
+            );
+
+            userToShadow = username: {...}: "${username}:!:1::::::";
+
+            shadowContents = (
+              lib.concatStringsSep "\n"
+              (lib.attrValues (lib.mapAttrs userToShadow users))
+            );
+
+            groupMemberMap = (
               let
-                bundleNixpkgs = true;
-                channelName = "nixpkgs";
-                channelURL = "https://nixos.org/channels/nixos-unstable";
-                defaultPkgs = [
-                  pkgs.bashInteractive
-                  pkgs.bind.dnsutils
-                  pkgs.coreutils-full
-                  pkgs.curl
-                  pkgs.dogdns
-                  pkgs.gawk
-                  pkgs.git
-                  pkgs.glibc
-                  pkgs.gnugrep
-                  pkgs.gnused
-                  pkgs.gzip
-                  pkgs.iputils
-                  pkgs.nix
-                  pkgs.nodejs-16_x
-                  pkgs.nushell
-                  pkgs.podman
-                  pkgs.regctl
-                  pkgs.stdenv.cc.cc.lib
-
-                  docker-client
-
-                  # self.packages.${system}.podman-push-container
-                  # self.packages.${system}.docker-push-container
-                  self.packages.${system}.push-container
-                ];
-
-                flake-registry = null;
-
-                users = {
-                  root = {
-                    uid = 0;
-                    shell = "${pkgs.bashInteractive}/bin/bash";
-                    home = "/root";
-                    gid = 0;
-                    groups = [ "root" ];
-                    description = "System administrator";
-                  };
-                  nobody = {
-                    uid = 65534;
-                    shell = "${pkgs.shadow}/bin/nologin";
-                    home = "/var/empty";
-                    gid = 65534;
-                    groups = [ "nobody" ];
-                    description = "Unprivileged account (don't use!)";
-                  };
-                } // lib.listToAttrs (
-                  map
-                    (
-                      n: {
-                        name = "nixbld${toString n}";
-                        value = {
-                          uid = 30000 + n;
-                          gid = 30000;
-                          groups = [ "nixbld" ];
-                          description = "Nix build user ${toString n}";
-                        };
-                      }
-                    )
-                    (lib.lists.range 1 32)
-                );
-
-                groups = {
-                  root.gid = 0;
-                  nixbld.gid = 30000;
-                  nobody.gid = 65534;
-                };
-
-                userToPasswd = (
-                  k:
-                  { uid
-                  , gid ? 65534
-                  , home ? "/var/empty"
-                  , description ? ""
-                  , shell ? "/bin/false"
-                  , groups ? [ ]
-                  }: "${k}:x:${toString uid}:${toString gid}:${description}:${home}:${shell}"
-                );
-
-                passwdContents = (
-                  lib.concatStringsSep "\n"
-                    (lib.attrValues (lib.mapAttrs userToPasswd users))
-                );
-
-                userToShadow = k: { ... }: "${k}:!:1::::::";
-
-                shadowContents = (
-                  lib.concatStringsSep "\n"
-                    (lib.attrValues (lib.mapAttrs userToShadow users))
-                );
-
-                groupMemberMap = (
-                  let
-                    # Create a flat list of user/group mappings
-                    mappings = (
-                      builtins.foldl'
-                        (
-                          acc: user:
-                            let
-                              groups = users.${user}.groups or [ ];
-                            in
-                            acc ++ map
-                              (group: {
-                                inherit user group;
-                              })
-                              groups
-                        )
-                        [ ]
-                        (lib.attrNames users)
-                    );
-                  in
+                # Create a flat list of user/group mappings
+                mappings = (
+                  builtins.foldl'
                   (
-                    builtins.foldl'
-                      (
-                        acc: v: acc // {
-                          ${v.group} = acc.${v.group} or [ ] ++ [ v.user ];
-                        }
-                      )
-                      { }
-                      mappings)
-                );
-
-                groupToGroup = k: { gid }:
-                  let
-                    members = groupMemberMap.${k} or [ ];
-                  in
-                  "${k}:x:${toString gid}:${lib.concatStringsSep "," members}";
-
-                groupContents = (
-                  lib.concatStringsSep "\n"
-                    (lib.attrValues (lib.mapAttrs groupToGroup groups))
-                );
-
-                defaultNixConf = {
-                  sandbox = "false";
-                  build-users-group = "nixbld";
-                  trusted-public-keys = [
-                    "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-                  ];
-                  experimental-features = [
-                    "flakes"
-                    "nix-command"
-                  ];
-                };
-
-                nixConfContents = (lib.concatStringsSep "\n" (lib.mapAttrsFlatten
-                  (n: v:
-                    let
-                      vStr = if builtins.isList v then lib.concatStringsSep " " v else v;
+                    acc: user: let
+                      groups = users.${user}.groups or [];
                     in
-                    "${n} = ${vStr}")
-                  defaultNixConf)) + "\n";
+                      acc
+                      ++ map
+                      (group: {
+                        inherit user group;
+                      })
+                      groups
+                  )
+                  []
+                  (lib.attrNames users)
+                );
+              in (
+                builtins.foldl'
+                (
+                  acc: v:
+                    acc
+                    // {
+                      ${v.group} = acc.${v.group} or [] ++ [v.user];
+                    }
+                )
+                {}
+                mappings
+              )
+            );
 
-                containerSettings = ''
-                  [engine]
-                  init_path = "${pkgs.catatonit}/bin/catatonit"
-                  helper_binaries_dir = [ "${pkgs.podman}/libexec/podman" ]
+            groupToGroup = k: {gid}: let
+              members = groupMemberMap.${k} or [];
+            in "${k}:x:${toString gid}:${lib.concatStringsSep "," members}";
 
-                  [network]
-                  cni_plugin_dirs = [ "${pkgs.cni-plugins}/bin" ]
-                  network_backend = "netavark"
-                '';
+            groupContents = (
+              lib.concatStringsSep "\n"
+              (lib.attrValues (lib.mapAttrs groupToGroup groups))
+            );
 
-                containerStorage = ''
-                  [storage]
-                  driver = "overlay"
-                  graphroot = "/var/lib/containers/storage"
-                  runroot = "/run/containers/storage"
-                '';
+            defaultNixConf = {
+              sandbox = "false";
+              build-users-group = "nixbld";
+              trusted-public-keys = [
+                "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+              ];
+              experimental-features = [
+                "flakes"
+                "nix-command"
+              ];
+            };
 
-                containerRegistries = ''
-                  [registries]
-                  [registries.block]
-                  registries = [ ]
+            nixConfContents =
+              (lib.concatStringsSep "\n" (
+                lib.attrsets.mapAttrsToList (
+                  n: v: let
+                    vStr =
+                      if builtins.isList v
+                      then lib.concatStringsSep " " v
+                      else v;
+                  in "${n} = ${vStr}"
+                )
+                defaultNixConf
+              ))
+              + "\n";
 
-                  [registries.insecure]
-                  registries = [ ]
+            containerSettings = ''
+              [engine]
+              init_path = "${pkgs.catatonit}/bin/catatonit"
+              helper_binaries_dir = [ "${pkgs.podman}/libexec/podman" ]
 
-                  [registries.search]
-                  registries = [ "docker.io", "quay.io" ]
-                '';
+              [network]
+              cni_plugin_dirs = [ "${pkgs.cni-plugins}/bin" ]
+              network_backend = "netavark"
+            '';
 
-                containerPolicy = builtins.toJSON {
-                  default = [
+            containerStorage = ''
+              [storage]
+              driver = "overlay"
+              graphroot = "/var/lib/containers/storage"
+              runroot = "/run/containers/storage"
+            '';
+
+            containerRegistries = ''
+              [registries]
+              [registries.block]
+              registries = [ ]
+
+              [registries.insecure]
+              registries = [ ]
+
+              [registries.search]
+              registries = [ "docker.io", "quay.io" ]
+            '';
+
+            containerPolicy = builtins.toJSON {
+              default = [
+                {
+                  type = "insecureAcceptAnything";
+                }
+              ];
+              transports = {
+                docker-daemon = {
+                  "" = [
                     {
                       type = "insecureAcceptAnything";
                     }
                   ];
-                  transports = {
-                    docker-daemon = {
-                      "" = [
-                        {
-                          type = "insecureAcceptAnything";
-                        }
-                      ];
-                    };
-                  };
-                };
-
-                baseSystem =
-                  let
-                    nixpkgs = pkgs.path;
-                    channel = pkgs.runCommand "channel-nixos" { inherit bundleNixpkgs; } ''
-                      mkdir $out
-                      if [ "$bundleNixpkgs" ]; then
-                        ln -s ${nixpkgs} $out/nixpkgs
-                        echo "[]" > $out/manifest.nix
-                      fi
-                    '';
-                    rootEnv = pkgs.buildPackages.buildEnv {
-                      name = "root-profile-env";
-                      paths = defaultPkgs;
-                    };
-                    manifest = pkgs.buildPackages.runCommand "manifest.nix" { } ''
-                      cat > $out <<EOF
-                      [
-                      ${lib.concatStringsSep "\n" (builtins.map (drv: let
-                        outputs = drv.outputsToInstall or [ "out" ];
-                      in ''
-                        {
-                          ${lib.concatStringsSep "\n" (builtins.map (output: ''
-                            ${output} = { outPath = "${lib.getOutput output drv}"; };
-                          '') outputs)}
-                          outputs = [ ${lib.concatStringsSep " " (builtins.map (x: "\"${x}\"") outputs)} ];
-                          name = "${drv.name}";
-                          outPath = "${drv}";
-                          system = "${drv.system}";
-                          type = "derivation";
-                          meta = { };
-                        }
-                      '') defaultPkgs)}
-                      ]
-                      EOF
-                    '';
-                    profile = pkgs.buildPackages.runCommand "user-environment" { } ''
-                      mkdir $out
-                      cp -a ${rootEnv}/* $out/
-                      ln -s ${manifest} $out/manifest.nix
-                    '';
-                  in
-                  pkgs.runCommand "base-system"
-                    {
-                      inherit
-                        containerPolicy
-                        containerRegistries
-                        containerSettings
-                        containerStorage
-                        groupContents
-                        nixConfContents
-                        passwdContents
-                        shadowContents;
-                      passAsFile = [
-                        "containerPolicy"
-                        "containerRegistries"
-                        "containerSettings"
-                        "containerStorage"
-                        "groupContents"
-                        "nixConfContents"
-                        "passwdContents"
-                        "shadowContents"
-                      ];
-                      allowSubstitutes = false;
-                      preferLocalBuild = true;
-                    } ''
-                    env
-                    set -x
-                    mkdir -p $out/etc
-                    mkdir -p $out/etc/ssl/certs
-                    ln -s /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt $out/etc/ssl/certs
-                    cat $passwdContentsPath > $out/etc/passwd
-                    echo "" >> $out/etc/passwd
-                    cat $groupContentsPath > $out/etc/group
-                    echo "" >> $out/etc/group
-                    cat $shadowContentsPath > $out/etc/shadow
-                    echo "" >> $out/etc/shadow
-                    mkdir -p $out/usr
-                    ln -s /nix/var/nix/profiles/share $out/usr/
-                    mkdir -p $out/nix/var/nix/gcroots
-                    mkdir -p $out/tmp
-                    mkdir -p $out/var/tmp
-                    mkdir -p $out/etc/nix
-                    cat $nixConfContentsPath > $out/etc/nix/nix.conf
-                    mkdir -p $out/root
-                    mkdir -p $out/nix/var/nix/profiles/per-user/root
-
-                    mkdir -p $out/etc/containers
-                    mkdir -p $out/etc/containers/networks
-                    mkdir -p $out/var/lib/containers/storage
-                    mkdir -p $out/run/containers/storage
-                    cat $containerSettingsPath > $out/etc/containers/containers.conf
-                    cat $containerStoragePath > $out/etc/containers/storage.conf
-                    cat $containerRegistriesPath > $out/etc/containers/registry.conf
-                    cat $containerPolicyPath > $out/etc/containers/policy.json
-
-                    ln -s ${profile} $out/nix/var/nix/profiles/default-1-link
-                    ln -s $out/nix/var/nix/profiles/default-1-link $out/nix/var/nix/profiles/default
-                    ln -s /nix/var/nix/profiles/default $out/root/.nix-profile
-                    ln -s ${channel} $out/nix/var/nix/profiles/per-user/root/channels-1-link
-                    ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
-                    mkdir -p $out/root/.nix-defexpr
-                    ln -s $out/nix/var/nix/profiles/per-user/root/channels $out/root/.nix-defexpr/channels
-                    echo "${channelURL} ${channelName}" > $out/root/.nix-channels
-                    mkdir -p $out/bin $out/usr/bin
-                    ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
-                    ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
-                  '' + (lib.optionalString (flake-registry != null) ''
-                    nixCacheDir="/root/.cache/nix"
-                    mkdir -p $out$nixCacheDir
-                    globalFlakeRegistryPath="$nixCacheDir/flake-registry.json"
-                    ln -s ${flake-registry}/flake-registry.json $out$globalFlakeRegistryPath
-                    mkdir -p $out/nix/var/nix/gcroots/auto
-                    rootName=$(${pkgs.nix}/bin/nix --extra-experimental-features nix-command hash file --type sha1 --base32 <(echo -n $globalFlakeRegistryPath))
-                    ln -s $globalFlakeRegistryPath $out/nix/var/nix/gcroots/auto/$rootName
-                  '');
-              in
-              pkgs.dockerTools.buildLayeredImageWithNixDb {
-                name = "nixos-runner";
-                tag = "latest";
-                maxLayers = 2;
-                contents = [
-                  baseSystem
-                ] ++ defaultPkgs;
-                extraCommands = ''
-                  rm -rf nix-support
-                  ln -s /nix/var/nix/profiles nix/var/nix/gcroots/profiles
-                '';
-                fakeRootCommands = ''
-                  chmod 1777 tmp
-                  chmod 1777 var/tmp
-                '';
-                config = {
-                  Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
-                  Env = [
-                    "USER=root"
-                    "PATH=${lib.concatStringsSep ":" [
-                      "/root/.nix-profile/bin"
-                      "/nix/var/nix/profiles/default/bin"
-                      "/nix/var/nix/profiles/default/sbin"
-                    ]}"
-                    "MANPATH=${lib.concatStringsSep ":" [
-                      "/root/.nix-profile/share/man"
-                      "/nix/var/nix/profiles/default/share/man"
-                    ]}"
-                    "LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [pkgs.glibc pkgs.stdenv.cc.cc.lib]}"
-                    "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                    "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                    "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                    "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/.nix-defexpr/channels"
-                  ];
                 };
               };
-            # podman-push-container = pkgs.writeTextFile {
-            #   name = "podman-push-container";
-            #   destination = "/bin/podman-push-container";
-            #   text = builtins.replaceStrings
-            #     [
-            #       "@nushell@"
-            #       "@client@"
-            #     ]
-            #     [
-            #       "${pkgs.nushell}/bin/nu"
-            #       "${pkgs.podman}/bin/podman"
-            #     ]
-            #     (builtins.readFile ./push-container.nu);
-            #   executable = true;
-            # };
-            # docker-push-container = pkgs.writeTextFile {
-            #   name = "docker-push-container";
-            #   destination = "/bin/docker-push-container";
-            #   text = builtins.replaceStrings
-            #     [
-            #       "@nushell@"
-            #       "@client@"
-            #     ]
-            #     [
-            #       "${pkgs.nushell}/bin/nu"
-            #       "${docker-client}/bin/docker"
-            #     ]
-            #     (builtins.readFile ./push-container.nu);
-            #   executable = true;
-            # };
-            push-container = pkgs.writeTextFile {
-              name = "push-container";
-              destination = "/bin/push-container";
-              text = builtins.replaceStrings
-                [
-                  "@nushell@"
-                  "@regctl@"
-                ]
-                [
-                  "${pkgs.nushell}/bin/nu"
-                  "${pkgs.regctl}/bin/regctl"
-                ]
-                (builtins.readFile ./push-container.nu);
-              executable = true;
             };
-          };
-          apps = {
-            # podman-push-container = {
-            #   type = "app";
-            #   program = "${self.packages.${system}.podman-push-container}/bin/podman-push-container";
-            # };
-            # docker-push-container = {
-            #   type = "app";
-            #   program = "${self.packages.${system}.docker-push-container}/bin/docker-push-container";
-            # };
-            push-container = {
-              type = "app";
-              program = "${self.packages.${system}.push-container}/bin/push-container";
+
+            baseSystem = let
+              nixpkgs = pkgs.path;
+              channel = pkgs.runCommand "channel-nixos" {inherit bundleNixpkgs;} ''
+                mkdir $out
+                if [ "$bundleNixpkgs" ]; then
+                  ln -s ${nixpkgs} $out/nixpkgs
+                  echo "[]" > $out/manifest.nix
+                fi
+              '';
+              rootEnv = pkgs.buildPackages.buildEnv {
+                name = "root-profile-env";
+                paths = defaultPkgs;
+              };
+              manifest = pkgs.buildPackages.runCommand "manifest.nix" {} ''
+                cat > $out <<EOF
+                [
+                ${lib.concatStringsSep "\n" (builtins.map (drv: let
+                    outputs = drv.outputsToInstall or ["out"];
+                  in ''
+                    {
+                      ${lib.concatStringsSep "\n" (builtins.map (output: ''
+                        ${output} = { outPath = "${lib.getOutput output drv}"; };
+                      '')
+                      outputs)}
+                      outputs = [ ${lib.concatStringsSep " " (builtins.map (x: "\"${x}\"") outputs)} ];
+                      name = "${drv.name}";
+                      outPath = "${drv}";
+                      system = "${drv.system}";
+                      type = "derivation";
+                      meta = { };
+                    }
+                  '')
+                  defaultPkgs)}
+                ]
+                EOF
+              '';
+              profile = pkgs.buildPackages.runCommand "user-environment" {} ''
+                mkdir $out
+                cp -a ${rootEnv}/* $out/
+                ln -s ${manifest} $out/manifest.nix
+              '';
+            in
+              pkgs.runCommand "base-system"
+              {
+                inherit
+                  containerPolicy
+                  containerRegistries
+                  containerSettings
+                  containerStorage
+                  groupContents
+                  nixConfContents
+                  passwdContents
+                  shadowContents
+                  ;
+                passAsFile = [
+                  "containerPolicy"
+                  "containerRegistries"
+                  "containerSettings"
+                  "containerStorage"
+                  "groupContents"
+                  "nixConfContents"
+                  "passwdContents"
+                  "shadowContents"
+                ];
+                allowSubstitutes = false;
+                preferLocalBuild = true;
+              } ''
+                env
+                set -x
+                mkdir -p $out/etc
+                mkdir -p $out/etc/ssl/certs
+                ln -s /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt $out/etc/ssl/certs
+                cat $passwdContentsPath > $out/etc/passwd
+                echo "" >> $out/etc/passwd
+                cat $groupContentsPath > $out/etc/group
+                echo "" >> $out/etc/group
+                cat $shadowContentsPath > $out/etc/shadow
+                echo "" >> $out/etc/shadow
+                mkdir -p $out/usr
+                ln -s /nix/var/nix/profiles/share $out/usr/
+                mkdir -p $out/nix/var/nix/gcroots
+                mkdir -p $out/tmp
+                mkdir -p $out/var/tmp
+                mkdir -p $out/etc/nix
+                cat $nixConfContentsPath > $out/etc/nix/nix.conf
+                mkdir -p $out/root
+                mkdir -p $out/nix/var/nix/profiles/per-user/root
+
+                mkdir -p $out/etc/containers
+                mkdir -p $out/etc/containers/networks
+                mkdir -p $out/var/lib/containers/storage
+                mkdir -p $out/run/containers/storage
+                cat $containerSettingsPath > $out/etc/containers/containers.conf
+                cat $containerStoragePath > $out/etc/containers/storage.conf
+                cat $containerRegistriesPath > $out/etc/containers/registry.conf
+                cat $containerPolicyPath > $out/etc/containers/policy.json
+
+                ln -s ${profile} $out/nix/var/nix/profiles/default-1-link
+                ln -s $out/nix/var/nix/profiles/default-1-link $out/nix/var/nix/profiles/default
+                ln -s /nix/var/nix/profiles/default $out/root/.nix-profile
+                ln -s ${channel} $out/nix/var/nix/profiles/per-user/root/channels-1-link
+                ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
+                mkdir -p $out/root/.nix-defexpr
+                ln -s $out/nix/var/nix/profiles/per-user/root/channels $out/root/.nix-defexpr/channels
+                echo "${channelURL} ${channelName}" > $out/root/.nix-channels
+                mkdir -p $out/bin $out/usr/bin
+                ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
+                ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
+              ''
+              + (lib.optionalString (flake-registry != null) ''
+                nixCacheDir="/root/.cache/nix"
+                mkdir -p $out$nixCacheDir
+                globalFlakeRegistryPath="$nixCacheDir/flake-registry.json"
+                ln -s ${flake-registry}/flake-registry.json $out$globalFlakeRegistryPath
+                mkdir -p $out/nix/var/nix/gcroots/auto
+                rootName=$(${pkgs.nix}/bin/nix --extra-experimental-features nix-command hash file --type sha1 --base32 <(echo -n $globalFlakeRegistryPath))
+                ln -s $globalFlakeRegistryPath $out/nix/var/nix/gcroots/auto/$rootName
+              '');
+          in
+            pkgs.dockerTools.buildLayeredImageWithNixDb {
+              name = "nixos-runner";
+              tag = "latest";
+              maxLayers = 2;
+              contents =
+                [
+                  baseSystem
+                ]
+                ++ defaultPkgs;
+              extraCommands = ''
+                rm -rf nix-support
+                ln -s /nix/var/nix/profiles nix/var/nix/gcroots/profiles
+              '';
+              fakeRootCommands = ''
+                chmod 1777 tmp
+                chmod 1777 var/tmp
+              '';
+              config = {
+                Cmd = ["${pkgs.bashInteractive}/bin/bash"];
+                Env = [
+                  "USER=root"
+                  "PATH=${lib.concatStringsSep ":" [
+                    "/root/.nix-profile/bin"
+                    "/nix/var/nix/profiles/default/bin"
+                    "/nix/var/nix/profiles/default/sbin"
+                  ]}"
+                  "MANPATH=${lib.concatStringsSep ":" [
+                    "/root/.nix-profile/share/man"
+                    "/nix/var/nix/profiles/default/share/man"
+                  ]}"
+                  "LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [pkgs.glibc pkgs.stdenv.cc.cc.lib]}"
+                  "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                  "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                  "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                  "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/.nix-defexpr/channels"
+                ];
+              };
             };
+          push-container = pkgs.writeTextFile {
+            name = "push-container";
+            destination = "/bin/push-container";
+            text = lib.concatStringsSep "\n" [
+              "#!${pkgs.nushell}/bin/nu"
+              ""
+              "alias regctl = ^${pkgs.regctl}/bin/regctl --verbosity warning"
+              "alias gzip = ^${pkgs.gzip}/bin/gzip"
+              ""
+              (builtins.readFile ./push-container.nu)
+            ];
+            executable = true;
           };
-        }
-      )
-    );
+        };
+        apps = {
+          push-container = {
+            type = "app";
+            program = "${self.packages.${system}.push-container}/bin/push-container";
+          };
+        };
+      }
+    )
+  );
 }
