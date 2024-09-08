@@ -4,7 +4,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    container: docker.io/jcollie/nixos-runner:latest
+    container: docker.io/jcollie/nixos-runner:64-47000729b
     steps:
       - uses: actions/checkout@v4
       - run: set
