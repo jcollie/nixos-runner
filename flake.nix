@@ -65,6 +65,12 @@
         docker-client = pkgs.docker_26.override {
           clientOnly = true;
         };
+        git = pkgs.git.override {
+          perlSupport = false;
+          sendEmailSupport = false;
+          withManual = false;
+          withSsh = true;
+        };
       in {
         packages = {
           nixos-runner = let
@@ -78,7 +84,6 @@
               pkgs.curl
               pkgs.dogdns
               pkgs.gawk
-              pkgs.git
               pkgs.glibc
               pkgs.gnugrep
               pkgs.gnused
@@ -86,7 +91,6 @@
               pkgs.iputils
               pkgs.less
               pkgs.lix
-              # pkgs.nix
               pkgs.nodejs_20
               pkgs.nushell
               pkgs.more
@@ -96,6 +100,7 @@
               pkgs.which
 
               docker-client
+              git
 
               self.packages.${system}.push-container
             ];
