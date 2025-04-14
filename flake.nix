@@ -409,7 +409,7 @@
             name = "push-container";
             destination = "/bin/push-container";
             text = lib.concatStringsSep "\n" [
-              "#!${pkgs.nushell}/bin/nu"
+              "#!${lib.getExe pkgs.nushell} --log-level=debug"
               ""
               "alias regctl = ^${pkgs.regctl}/bin/regctl --verbosity warning"
               "alias gzip = ^${pkgs.gzip}/bin/gzip"
