@@ -8,16 +8,11 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
-    # lix-module = {
-    #   url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 
   outputs = {
     self,
     flake-utils,
-    # lix-module,
     nixpkgs,
   }: (
     flake-utils.lib.eachDefaultSystem
@@ -25,40 +20,7 @@
       system: let
         pkgs = import nixpkgs {
           inherit system;
-          # imports = [
-          #   lix-module.nixosModules.default
-          # ];
-          # nix.package = pkgs.lix;
-
-          # config.permittedInsecurePackages = [
-          #   "nodejs-16.20.2"
-          # ];
           overlays = [
-            # (
-            #   self: super: {
-            #     regclient = let
-            #       pname = "regclient";
-            #       version = "0.5.1+";
-            #       src = pkgs.fetchFromGitHub {
-            #         owner = "regclient";
-            #         repo = "regclient";
-            #         rev = "72df49963a17092138854c5d9d7943deac1dde6b";
-            #         hash = "sha256-9k1VXtaHTF1GMIDs5qGzJkqPZa+ZKrWes+LakVKaQ38=";
-            #       };
-            #       vendorHash = "sha256-j+XidIgjJ5uw1d4OXRl3pjiW5Hvy7WqNM0KdVWMvWls=";
-            #     in
-            #       super.buildGoModule {
-            #         inherit pname version src vendorHash;
-            #         inherit (super.regclient) meta outputs postInstall;
-            #         ldflags = [
-            #           "-s"
-            #           "-w"
-            #           "-X main.VCSTag=v${version}"
-            #         ];
-            #         doCheck = false;
-            #       };
-            #   }
-            # )
           ];
         };
         lib = pkgs.lib;
@@ -92,7 +54,6 @@
               pkgs.gzip
               pkgs.iputils
               pkgs.less
-              pkgs.lix
               pkgs.nodejs_20
               pkgs.nushell
               pkgs.more
