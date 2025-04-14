@@ -24,7 +24,7 @@
           ];
         };
         lib = pkgs.lib;
-        docker-client = pkgs.docker_26.override {
+        docker-client = pkgs.docker_28.override {
           clientOnly = true;
         };
         git = pkgs.git.override {
