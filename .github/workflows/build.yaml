@@ -13,7 +13,7 @@ jobs:
       - run: set
       - run: ls -la /github
       - run: nix build -L .#nixos-runner
-      - run: nix run .#push-container -- result
+      - run: push-container result
         env:
           REGISTRY: ghcr.io
           REPOSITORY: ${{ github.repository_owner }}/nixos-runner
