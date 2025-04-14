@@ -8,16 +8,16 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
-    lix-module = {
-      url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # lix-module = {
+    #   url = "https://git.lix.systems/lix-project/nixos-module/archive/2.91.0.tar.gz";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = {
     self,
     flake-utils,
-    lix-module,
+    # lix-module,
     nixpkgs,
   }: (
     flake-utils.lib.eachDefaultSystem
@@ -25,10 +25,10 @@
       system: let
         pkgs = import nixpkgs {
           inherit system;
-          imports = [
-            lix-module.nixosModules.default
-          ];
-          nix.package = pkgs.lix;
+          # imports = [
+          #   lix-module.nixosModules.default
+          # ];
+          # nix.package = pkgs.lix;
 
           # config.permittedInsecurePackages = [
           #   "nodejs-16.20.2"
