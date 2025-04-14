@@ -12,7 +12,6 @@ jobs:
       - uses: actions/checkout@v4
       - run: set
       - run: ls -la /github
-      - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: nix build -L .#nixos-runner
       - run: nix run .#push-container -- result
         env:
