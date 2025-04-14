@@ -420,6 +420,12 @@
           };
         };
         apps = {
+          attic-client = let
+            client = pkgs.attic-client;
+          in {
+            type = "app";
+            program = lib.getExe client;
+          };
           push-container = {
             type = "app";
             program = "${self.packages.${system}.push-container}/bin/push-container";

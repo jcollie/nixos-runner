@@ -7,7 +7,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: set
+      - run: |
+          nix run .#attic-client -- login cloud03 ${{ vars.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
+          nix run .#attic-client -- use ocjtech-1
       - run: nix build -L .#nixos-runner
+      - run: |
+          nix run .#attic-client -- push ocjtech-1 result
       - run: nix run .#push-container -- result
         env:
           REGISTRY: git.ocjtech.us
