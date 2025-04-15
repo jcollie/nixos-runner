@@ -29,7 +29,7 @@ def main [
          and
         (not ($env | get -i GITHUB_SHA | is-empty))
     ) {
-        $tags | append $"($env.GITHUB_RUN_NUMBER)-($env.GITHUB_SHA | str substring 0..8)"
+        $tags | append $"($env.GITHUB_RUN_NUMBER)-($env.GITHUB_SHA | str substring 0..7)"
     } else {
         $tags
     }
@@ -41,7 +41,7 @@ def main [
          and
         (not ($env | get -i DRONE_COMMIT_SHA | is-empty))
     ) {
-        $tags | append $"($env.DRONE_BUILD_NUMBER)-($env.DRONE_COMMIT_SHA | str substring 0..8)"
+        $tags | append $"($env.DRONE_BUILD_NUMBER)-($env.DRONE_COMMIT_SHA | str substring 0..7)"
     } else {
         $tags
     }
@@ -132,23 +132,20 @@ def main [
         }
     )
 
-    print $"Registry: ($registry)"
-    print $"Repository: ($repository)"
-
-    regctl --verbosity debug registry login $registry --user $auth.username --pass $auth.password
+    regctl registry login $registry --user $auth.username --pass $auth.password
 
     $tags | enumerate | each {
         |item|
         if $item.index == 0 {
             let new_image = $"($registry)/($repository):($item.item)"
             print $"Pushing ($new_image)"
-            regctl --verbosity debug image import $new_image $input
+            regctl image import $new_image $input
             print $"Pushed ($new_image)"
         } else {
             let old_image = $"($registry)/($repository):($tags | get 0)"
             let new_image = $"($registry)/($repository):($item.item)"
             print $"Copying ($old_image) ($new_image)"
-            regctl --verbosity debug image copy $old_image $new_image
+            regctl image copy $old_image $new_image
             print $"Copied ($old_image) ($new_image)"
         }
     }

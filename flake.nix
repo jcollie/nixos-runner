@@ -37,6 +37,8 @@
         };
       in {
         packages = {
+          docker-client = docker-client;
+          git = git;
           nixos-runner = let
             bundleNixpkgs = true;
             channelName = "nixpkgs";

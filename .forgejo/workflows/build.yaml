@@ -11,11 +11,14 @@ jobs:
         run: |
           nix run .#attic-client -- login ${{ vars.ATTIC_SERVER }} ${{ vars.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
           nix run .#attic-client -- use ${{ vars.ATTIC_CACHE }}
+          nix path-info --all | LANG=C sort > before
       - name: Build
         run: nix build -L .#nixos-runner
       - name: Push results to cache
         run: |
-          nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} result
+          nix path-info --all | LANG=C sort > after
+          comm -13 before after > new
+          cat new | nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} --stdin
       - name: Push container
         run: nix run .#push-container -- result
         env:
