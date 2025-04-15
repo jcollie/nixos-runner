@@ -9,13 +9,13 @@ jobs:
       - run: set
       - name: Set up cache
         run: |
-          nix run .#attic-client -- login cloud03 ${{ vars.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
-          nix run .#attic-client -- use ocjtech-1
+          nix run .#attic-client -- login ${{ vars.ATTIC_SERVER }} ${{ vars.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
+          nix run .#attic-client -- use ${{ vars.ATTIC_CACHE }}
       - name: Build
         run: nix build -L .#nixos-runner
       - name: Push results to cache
         run: |
-          nix run .#attic-client -- push ocjtech-1 result
+          nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} result
       - name: Push container
         run: nix run .#push-container -- result
         env:
@@ -23,3 +23,10 @@ jobs:
           REPOSITORY: ${{ vars.FORGEJO_USERNAME }}/nixos-runner
           USERNAME: ${{ vars.FORGEJO_USERNAME }}
           PASSWORD: ${{ secret.FORGEJO_PASSWORD }}
+      - name: Push container
+        run: nix run .#push-container -- result
+        env:
+          REGISTRY: ${{ vars.DOCKER_REGISTRY }}
+          REPOSITORY: ${{ vars.DOCKER_USERNAME }}/nixos-runner
+          USERNAME: ${{ vars.DOCKER_USERNAME }}
+          PASSWORD: ${{ secret.DOCKER_PASSWORD }}

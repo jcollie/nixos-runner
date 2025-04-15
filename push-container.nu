@@ -135,20 +135,20 @@ def main [
     print $"Registry: ($registry)"
     print $"Repository: ($repository)"
 
-    regctl registry login $registry --user $auth.username --pass $auth.password
+    regctl --verbosity debug registry login $registry --user $auth.username --pass $auth.password
 
     $tags | enumerate | each {
         |item|
         if $item.index == 0 {
             let new_image = $"($registry)/($repository):($item.item)"
             print $"Pushing ($new_image)"
-            regctl image import $new_image $input
+            regctl --verbosity debug image import $new_image $input
             print $"Pushed ($new_image)"
         } else {
             let old_image = $"($registry)/($repository):($tags | get 0)"
             let new_image = $"($registry)/($repository):($item.item)"
             print $"Copying ($old_image) ($new_image)"
-            regctl image copy $old_image $new_image
+            regctl --verbosity debug image copy $old_image $new_image
             print $"Copied ($old_image) ($new_image)"
         }
     }
