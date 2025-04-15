@@ -19,7 +19,7 @@ jobs:
       - name: Push container
         run: nix run .#push-container -- result
         env:
-          REGISTRY: ${{ vars.FORGEO_REGIISTRY }}
+          REGISTRY: ${{ vars.FORGEJO_REGISTRY }}
           REPOSITORY: ${{ vars.FORGEJO_USERNAME }}/nixos-runner
           USERNAME: ${{ vars.FORGEJO_USERNAME }}
           PASSWORD: ${{ secret.FORGEJO_PASSWORD }}
