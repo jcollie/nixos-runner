@@ -54,6 +54,7 @@
               pkgs.gzip
               pkgs.iputils
               pkgs.less
+              pkgs.nix
               pkgs.nodejs_20
               pkgs.nushell
               pkgs.more
@@ -409,9 +410,9 @@
             name = "push-container";
             destination = "/bin/push-container";
             text = lib.concatStringsSep "\n" [
-              "#!${lib.getExe pkgs.nushell} --log-level=debug"
+              "#!${lib.getExe pkgs.nushell}"
               ""
-              "alias regctl = ^${pkgs.regctl}/bin/regctl --verbosity warning"
+              "alias regctl = ^${pkgs.regctl}/bin/regctl"
               "alias gzip = ^${pkgs.gzip}/bin/gzip"
               ""
               (builtins.readFile ./push-container.nu)
