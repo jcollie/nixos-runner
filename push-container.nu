@@ -132,6 +132,8 @@ def main [
         }
     )
 
+    print $"Registry: ($registry)"
+    print $"Repository: ($repository)"
 
     regctl registry login $registry --user $auth.username --pass $auth.password
 

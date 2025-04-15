@@ -13,12 +13,13 @@ jobs:
           nix run .#attic-client -- use ocjtech-1
       - name: Build
         run: nix build -L .#nixos-runner
-      - run: |
-          nix run .#attic-client -- push ocjtech-1 result
       - name: Push results to cache
+        run: |
+          nix run .#attic-client -- push ocjtech-1 result
+      - name: Push container
         run: nix run .#push-container -- result
         env:
-          REGISTRY: git.ocjtech.us
-          REPOSITORY: ${{ github.repository_owner }}/nixos-runner
-          USERNAME: ${{ github.actor }}
-          PASSWORD: ${{ github.token }}
+          REGISTRY: ${{ vars.FORGEO_REGIISTRY }}
+          REPOSITORY: ${{ vars.FORGEJO_USERNAME }}/nixos-runner
+          USERNAME: ${{ vars.FORGEJO_USERNAME }}
+          PASSWORD: ${{ secret.FORGEJO_PASSWORD }}

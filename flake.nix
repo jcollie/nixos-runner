@@ -42,6 +42,7 @@
             channelName = "nixpkgs";
             channelURL = "https://nixos.org/channels/nixos-unstable";
             defaultPkgs = [
+              pkgs.attic-client
               pkgs.bashInteractive
               pkgs.bind.dnsutils
               pkgs.coreutils-full
@@ -61,6 +62,7 @@
               pkgs.podman
               pkgs.regctl
               pkgs.stdenv.cc.cc.lib
+              pkgs.tailscale
               pkgs.which
 
               docker-client
