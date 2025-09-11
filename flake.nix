@@ -32,6 +32,17 @@
           lib = pkgs.lib;
         in
         {
+          docker-client = pkgs.docker_28.override {
+            clientOnly = true;
+          };
+          git = pkgs.git.override {
+            perlSupport = false;
+            pythonSupport = false;
+            svnSupport = false;
+            sendEmailSupport = false;
+            withManual = false;
+            withSsh = true;
+          };
           nixos-runner =
             let
               bundleNixpkgs = true;
@@ -63,18 +74,8 @@
                 pkgs.which
                 pkgs.xz
 
-                (pkgs.docker_28.override {
-                  clientOnly = true;
-                })
-                (pkgs.git.override {
-                  perlSupport = false;
-                  pythonSupport = false;
-                  svnSupport = false;
-                  sendEmailSupport = false;
-                  withManual = false;
-                  withSsh = true;
-                })
-
+                self.packages.${pkgs.system}.docker-client
+                self.packages.${pkgs.system}.git
                 self.packages.${pkgs.system}.push-container
               ];
 
