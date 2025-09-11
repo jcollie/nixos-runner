@@ -364,7 +364,7 @@
                     echo "${channelURL} ${channelName}" > $out/root/.nix-channels
 
                     mkdir -p $out/root/.config/git
-                    cat $gitConfigPath > $out/root/.config/git
+                    cat $gitConfigPath > $out/root/.config/git/config
 
                     mkdir -p $out/bin $out/usr/bin
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
