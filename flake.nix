@@ -241,6 +241,11 @@
                 };
               };
 
+              gitConfig = ''
+                [safe]
+                  directory = *
+              '';
+
               baseSystem =
                 let
                   nixpkgs = pkgs.path;
@@ -301,6 +306,7 @@
                       nixConfContents
                       passwdContents
                       shadowContents
+                      gitConfig
                       ;
                     passAsFile = [
                       "containerPolicy"
@@ -311,6 +317,7 @@
                       "nixConfContents"
                       "passwdContents"
                       "shadowContents"
+                      "gitConfig"
                     ];
                     allowSubstitutes = false;
                     preferLocalBuild = true;
@@ -351,9 +358,14 @@
                     ln -s /nix/var/nix/profiles/default $out/root/.nix-profile
                     ln -s ${channel} $out/nix/var/nix/profiles/per-user/root/channels-1-link
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
+
                     mkdir -p $out/root/.nix-defexpr
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels $out/root/.nix-defexpr/channels
                     echo "${channelURL} ${channelName}" > $out/root/.nix-channels
+
+                    mkdir -p $out/root/.config/git
+                    cat $gitConfigPath > $out/root/.config/git
+
                     mkdir -p $out/bin $out/usr/bin
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
                     ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
