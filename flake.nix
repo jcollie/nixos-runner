@@ -73,6 +73,7 @@
                 pkgs.tailscale
                 pkgs.which
                 pkgs.xz
+                pkgs.zstd
 
                 self.packages.${pkgs.system}.docker-client
                 self.packages.${pkgs.system}.git
