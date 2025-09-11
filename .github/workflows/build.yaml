@@ -1,7 +1,9 @@
 name: build nixos-runner
 
 on:
-  - push
+  push:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

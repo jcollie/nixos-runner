@@ -8,10 +8,10 @@ jobs:
       - name: Checkout code
         uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      # - name: Set up cache
-      #   uses: https://github.com/DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
-      #   with:
-      #     use-flakehub: false
+      - name: Set up cache
+        uses: https://github.com/DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+        with:
+          use-flakehub: false
 
       - name: Build
         run: nix build -L .#nixos-runner
