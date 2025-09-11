@@ -5,28 +5,26 @@ jobs:
   build:
     runs-on: nixos
     steps:
-      - uses: actions/checkout@v4
-      - run: set
+      - name: Checkout code
+        uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
       - name: Set up cache
-        run: |
-          nix run .#attic-client -- login ${{ vars.ATTIC_SERVER }} ${{ vars.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
-          nix run .#attic-client -- use ${{ vars.ATTIC_CACHE }}
-          nix path-info --all | LANG=C sort > before
+        uses: https://github.com/DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+        with:
+          use-flakehub: false
+
       - name: Build
         run: nix build -L .#nixos-runner
-      - name: Push results to cache
-        run: |
-          nix path-info --all | LANG=C sort > after
-          comm -13 before after > new
-          cat new | nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} --stdin
-      - name: Push container
+
+      - name: Push container to local registry
         run: nix run .#push-container -- result
         env:
           REGISTRY: ${{ vars.FORGEJO_REGISTRY }}
           REPOSITORY: ${{ vars.FORGEJO_USERNAME }}/nixos-runner
           USERNAME: ${{ vars.FORGEJO_USERNAME }}
           PASSWORD: ${{ secrets.FORGEJO_PASSWORD }}
-      - name: Push container
+
+      - name: Push container to docker registry
         run: nix run .#push-container -- result
         env:
           REGISTRY: ${{ vars.DOCKER_REGISTRY }}
