@@ -3,30 +3,26 @@ on:
   - push
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container: docker.io/jcollie/nixos-runner:latest
     permissions:
       id-token: "write"
       contents: "read"
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - name: Checkout code
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          fetch-depth: 0
+
       - name: Set up cache
-        run: |
-          nix run .#attic-client -- login ${{ vars.ATTIC_SERVER }} ${{ vars.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
-          nix run .#attic-client -- use ${{ vars.ATTIC_CACHE }}
+        uses: DeterminateSystems/magic-nix-cache-action
+        with:
+          use-flakehub: false
+
       - name: Build
         run: |
-          nix build -L .#docker-client
-          nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} result
-          nix build -L .#git
-          nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} result
-          nix build -L .#push-container
-          nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} result
           nix build -L .#nixos-runner
-          nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} result
-      - name: Push results to cache
-        run: |
-          nix run .#attic-client -- push ${{ vars.ATTIC_CACHE }} result
+
       - name: Push container
         run: nix run .#push-container -- result
         env:
