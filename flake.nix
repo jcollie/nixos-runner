@@ -54,7 +54,6 @@
                 pkgs.bind.dnsutils
                 pkgs.coreutils-full
                 pkgs.curl
-                pkgs.dogdns
                 pkgs.gawk
                 pkgs.glibc
                 pkgs.gnugrep
@@ -68,6 +67,7 @@
                 pkgs.nodejs_20
                 pkgs.nushell
                 pkgs.podman
+                pkgs.reuse
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
                 pkgs.tailscale
