@@ -75,9 +75,9 @@
                 pkgs.xz
                 pkgs.zstd
 
-                self.packages.${pkgs.system}.docker-client
-                self.packages.${pkgs.system}.git
-                self.packages.${pkgs.system}.push-container
+                self.packages.${pkgs.stdenv.hostPlatform.system}.docker-client
+                self.packages.${pkgs.stdenv.hostPlatform.system}.git
+                self.packages.${pkgs.stdenv.hostPlatform.system}.push-container
               ];
 
               flake-registry = null;
@@ -265,7 +265,7 @@
                     cat > $out <<EOF
                     [
                     ${lib.concatStringsSep "\n" (
-                      builtins.map (
+                      map (
                         drv:
                         let
                           outputs = drv.outputsToInstall or [ "out" ];
@@ -273,11 +273,11 @@
                         ''
                           {
                             ${lib.concatStringsSep "\n" (
-                              builtins.map (output: ''
+                              map (output: ''
                                 ${output} = { outPath = "${lib.getOutput output drv}"; };
                               '') outputs
                             )}
-                            outputs = [ ${lib.concatStringsSep " " (builtins.map (x: "\"${x}\"") outputs)} ];
+                            outputs = [ ${lib.concatStringsSep " " (map (x: "\"${x}\"") outputs)} ];
                             name = "${drv.name}";
                             outPath = "${drv}";
                             system = "${drv.system}";
