@@ -79,6 +79,7 @@
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
                 pkgs.tailscale
+                pkgs.tar
                 pkgs.which
                 pkgs.xz
                 pkgs.zstd
@@ -450,6 +451,17 @@
           # };
         }
       );
+      devShells = forAllSystems (pkgs: {
+        default = pkgs.mkShell {
+          name = "nixos-runner";
+          nativeBuildInputs = [
+            pkgs.regctl
+            pkgs.gzip
+            push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
+          ];
+
+        };
+      });
       apps = forAllSystems (pkgs: {
         push-container = {
           type = "app";
