@@ -79,7 +79,6 @@
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
                 pkgs.tailscale
-                pkgs.tar
                 pkgs.which
                 pkgs.xz
                 pkgs.zstd
