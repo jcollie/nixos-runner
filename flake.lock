@@ -13,9 +13,52 @@
         "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
       }
     },
+    "push-container": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "zig": "zig"
+      },
+      "locked": {
+        "lastModified": 1769905894,
+        "narHash": "sha256-vEQwYRDc8VNFT40pLXqeQpRzRi4Ki8nz0v6xVcDwlAY=",
+        "ref": "refs/heads/main",
+        "rev": "4da280dec0819e8a45b65dcd7cfd99bba5f57160",
+        "revCount": 2,
+        "type": "git",
+        "url": "https://git.ocjtech.us/jeff/push-container.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.ocjtech.us/jeff/push-container.git"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "push-container": "push-container"
+      }
+    },
+    "zig": {
+      "inputs": {
+        "nixpkgs": [
+          "push-container",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1769905375,
+        "narHash": "sha256-99X6x4OwJOqlDib9VdW6rImpj3uEeUPKZU8VSjVB3ZY=",
+        "ref": "refs/heads/main",
+        "rev": "0b3d93bd2ea88670571a82092f84104ca30be4a4",
+        "revCount": 1603,
+        "type": "git",
+        "url": "https://git.ocjtech.us/jeff/zig-overlay.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.ocjtech.us/jeff/zig-overlay.git"
       }
     }
   },

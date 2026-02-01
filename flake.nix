@@ -5,12 +5,19 @@
     nixpkgs = {
       url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz";
     };
+    push-container = {
+      url = "git+https://git.ocjtech.us/jeff/push-container.git";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
   };
 
   outputs =
     {
       self,
       nixpkgs,
+      push-container,
     }:
     let
       makePackages =
@@ -66,6 +73,7 @@
                 pkgs.nix
                 pkgs.nodejs_20
                 pkgs.nushell
+                pkgs.pinact
                 pkgs.podman
                 pkgs.reuse
                 pkgs.regctl
@@ -77,7 +85,7 @@
 
                 self.packages.${pkgs.stdenv.hostPlatform.system}.docker-client
                 self.packages.${pkgs.stdenv.hostPlatform.system}.git
-                self.packages.${pkgs.stdenv.hostPlatform.system}.push-container
+                push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
               ];
 
               flake-registry = null;
@@ -427,25 +435,27 @@
                 ];
               };
             };
-          push-container = pkgs.writeTextFile {
-            name = "push-container";
-            destination = "/bin/push-container";
-            text = lib.concatStringsSep "\n" [
-              "#!${lib.getExe pkgs.nushell}"
-              ""
-              "alias regctl = ^${pkgs.regctl}/bin/regctl"
-              "alias gzip = ^${pkgs.gzip}/bin/gzip"
-              ""
-              (builtins.readFile ./push-container.nu)
-            ];
-            executable = true;
-          };
+          # push-container = pkgs.writeTextFile {
+          #   name = "push-container";
+          #   destination = "/bin/push-container";
+          #   text = lib.concatStringsSep "\n" [
+          #     "#!${lib.getExe pkgs.nushell}"
+          #     ""
+          #     "alias regctl = ^${pkgs.regctl}/bin/regctl"
+          #     "alias gzip = ^${pkgs.gzip}/bin/gzip"
+          #     ""
+          #     (builtins.readFile ./push-container.nu)
+          #   ];
+          #   executable = true;
+          # };
         }
       );
       apps = forAllSystems (pkgs: {
         push-container = {
           type = "app";
-          program = "${self.packages.${pkgs.system}.push-container}/bin/push-container";
+          program = "${pkgs.lib.getExe
+            push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
+          }";
         };
       });
     };
