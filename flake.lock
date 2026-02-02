@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1769461804,
-        "narHash": "sha256-6LCoopbVfvyw+BnhOwMLSeQjotkBsJMHcvbPhrn2t9E=",
-        "rev": "bfc1b8a4574108ceef22f02bafcf6611380c100d",
+        "lastModified": 1769789167,
+        "narHash": "sha256-XBpD8PvMrKeQ7UXr8lYl+mm1tYeWX+qTTWAflzE0KtY=",
+        "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.05pre935279.bfc1b8a45741/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.05pre937308.62c838296046/nixexprs.tar.xz"
       },
       "original": {
         "type": "tarball",
@@ -21,11 +21,11 @@
         "zig": "zig"
       },
       "locked": {
-        "lastModified": 1769916118,
-        "narHash": "sha256-abEOOb4MSgd8lDHqJ2LhbfLnZzsF5AC5hL2s4W6mLFk=",
+        "lastModified": 1770003656,
+        "narHash": "sha256-dHkwOoUhEuDHhUGuLYShUhWH1kZI3RYa5NLbo81cgHc=",
         "ref": "refs/heads/main",
-        "rev": "49243f4c24a97b8683037f4b29672c2cc6db25f0",
-        "revCount": 4,
+        "rev": "41962f43e2ce95cc73713e7e1ea5c72996fd1077",
+        "revCount": 7,
         "type": "git",
         "url": "https://git.ocjtech.us/jeff/push-container.git"
       },
