@@ -71,7 +71,7 @@
                 pkgs.less
                 pkgs.more
                 pkgs.nix
-                pkgs.nodejs_20
+                pkgs.nodejs_25
                 pkgs.nushell
                 pkgs.pinact
                 pkgs.podman
