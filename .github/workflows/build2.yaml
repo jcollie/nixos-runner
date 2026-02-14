@@ -26,6 +26,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: test
+        run: |
+          echo $HOME
+          ls -la $HOME
+          echo ${{ github.workspace }}
+          ls -la ${{ github.workspace }}
+
+      - name: Configure safe directories
+        run: |
+          git config --global safe.directory=${{ github.workspace }}
+
       - name: Reuse Lint
         run: |
           nix run .#reuse-lint
