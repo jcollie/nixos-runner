@@ -34,7 +34,7 @@ jobs:
 
       - name: Configure safe directories
         run: |
-          git config --global safe.directory=*
+          git config --global safe.directory ${{ github.workspace }}
 
       - name: Reuse Lint
         run: |
