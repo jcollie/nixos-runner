@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: © 2023 Jeffrey C. Ollie
+# SPDX-License-Identifier: MIT
+
+name: build nixos-runner alternate
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/jcollie/nixos-runner:latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Reuse Lint
+        run: |
+          nix run .#reuse-lint
+
+      - name: Build
+        run: |
+          nix build -L .#nixos-runner
+
+      - name: Push container
+        run: nix run .#push-container -- result
+        env:
+          REGISTRY: ghcr.io
+          REPOSITORY: ${{ github.repository_owner }}/nixos-runner
+          USERNAME: ${{ github.actor }}
+          PASSWORD: ${{ github.token }}
