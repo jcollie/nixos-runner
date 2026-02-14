@@ -64,7 +64,9 @@
                 pkgs.bind.dnsutils
                 pkgs.coreutils-full
                 pkgs.curl
+                pkgs.forgejo-cli
                 pkgs.gawk
+                pkgs.gh
                 pkgs.glibc
                 pkgs.gnugrep
                 pkgs.gnused
