@@ -33,10 +33,10 @@ jobs:
           USERNAME: ${{ vars.FORGEJO_USERNAME }}
           PASSWORD: ${{ secrets.FORGEJO_PASSWORD }}
 
-      - name: Push container to docker registry
-        run: push-container result
-        env:
-          REGISTRY: ${{ vars.DOCKER_REGISTRY }}
-          REPOSITORY: ${{ vars.DOCKER_USERNAME }}/nixos-runner
-          USERNAME: ${{ vars.DOCKER_USERNAME }}
-          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      # - name: Push container to docker registry
+      #   run: push-container result
+      #   env:
+      #     REGISTRY: ${{ vars.DOCKER_REGISTRY }}
+      #     REPOSITORY: ${{ vars.DOCKER_USERNAME }}/nixos-runner
+      #     USERNAME: ${{ vars.DOCKER_USERNAME }}
+      #     PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
