@@ -359,8 +359,6 @@
                     preferLocalBuild = true;
                   }
                   ''
-                    env
-                    set -x
                     mkdir -p $out/etc
                     mkdir -p $out/etc/ssl/certs
                     ln -s /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt $out/etc/ssl/certs
@@ -416,8 +414,6 @@
                     mkdir -p $out/bin $out/usr/bin
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
                     ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
-
-
                   ''
                 + (lib.optionalString (flake-registry != null) ''
                   nixCacheDir="/root/.cache/nix"
@@ -455,6 +451,7 @@
                 # ln --symbolic --force "$(realpath --relative-to=etc etc/group)" etc/group
               '';
               fakeRootCommands = ''
+                chmod 4555 sbin/sudo
                 chmod 1777 tmp
                 chmod 1777 var/tmp
                 chown 1001:1001 github
