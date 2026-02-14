@@ -442,8 +442,17 @@
                 ln -s /nix/var/nix/profiles nix/var/nix/gcroots/profiles
 
                 # https://github.com/containerd/containerd/issues/12683
-                ln --symbolic --force "$(realpath --relative-to=etc etc/passwd)" etc/passwd
-                ln --symbolic --force "$(realpath --relative-to=etc etc/group)" etc/group
+
+                tmp="$(realpath --relative-to=etc etc/passwd)"
+                rm -f etc/passwd
+                cp "$tmp" etc/passwd
+
+                tmp="$(realpath --relative-to=etc etc/group)"
+                rm -f etc/group
+                cp "$tmp" etc/group
+
+                # ln --symbolic --force "$(realpath --relative-to=etc etc/passwd)" etc/passwd
+                # ln --symbolic --force "$(realpath --relative-to=etc etc/group)" etc/group
               '';
               fakeRootCommands = ''
                 chmod 1777 tmp
