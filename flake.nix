@@ -57,7 +57,7 @@
             let
               bundleNixpkgs = true;
               channelName = "nixpkgs";
-              channelURL = "https://nixos.org/channels/nixos-unstable";
+              channelURL = "https://channels.nixos.org/channels/nixos-unstable";
               defaultPkgs = [
                 pkgs.attic-client
                 pkgs.bashInteractive
@@ -93,8 +93,6 @@
                 self.packages.${pkgs.stdenv.hostPlatform.system}.git
                 push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
               ];
-
-              flake-registry = null;
 
               users = {
                 root = {
@@ -201,8 +199,12 @@
               groupContents = (lib.concatStringsSep "\n" (lib.attrValues (lib.mapAttrs groupToGroup groups)));
 
               defaultNixConf = {
-                sandbox = "false";
+                sandbox = "true";
                 build-users-group = "nixbld";
+                trusted-user = [
+                  "root"
+                  "github"
+                ];
                 trusted-public-keys = [
                   "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
                 ];
@@ -376,11 +378,6 @@
                     mkdir -p $out/var/tmp
                     mkdir -p $out/etc/nix
                     cat $nixConfContentsPath > $out/etc/nix/nix.conf
-                    mkdir -p $out/root
-                    mkdir -p $out/nix/var/nix/profiles/per-user/root
-                    mkdir -p $out/github
-                    mkdir -p $out/github/home
-                    mkdir -p $out/nix/var/nix/profiles/per-user/github
 
                     mkdir -p $out/etc/containers
                     mkdir -p $out/etc/containers/networks
@@ -391,39 +388,37 @@
                     cat $containerRegistriesPath > $out/etc/containers/registry.conf
                     cat $containerPolicyPath > $out/etc/containers/policy.json
 
+                    mkdir -p $out/nix/var/nix/profiles
                     ln -s ${profile} $out/nix/var/nix/profiles/default-1-link
                     ln -s $out/nix/var/nix/profiles/default-1-link $out/nix/var/nix/profiles/default
+
+                    mkdir -p $out/root
+                    mkdir -p $out/nix/var/nix/profiles/per-user/root
                     ln -s /nix/var/nix/profiles/default $out/root/.nix-profile
-                    ln -s /nix/var/nix/profiles/default $out/github/home/.nix-profile
                     ln -s ${channel} $out/nix/var/nix/profiles/per-user/root/channels-1-link
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
-
                     mkdir -p $out/root/.nix-defexpr
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels $out/root/.nix-defexpr/channels
                     echo "${channelURL} ${channelName}" > $out/root/.nix-channels
+                    mkdir -p $out/root/.config/git
+                    cat $gitConfigPath > $out/root/.config/git/config
 
+                    mkdir -p $out/github
+                    mkdir -p $out/github/home
+                    mkdir -p $out/nix/var/nix/profiles/per-user/github
+                    ln -s /nix/var/nix/profiles/default $out/github/home/.nix-profile
+                    ln -s ${channel} $out/nix/var/nix/profiles/per-user/github/channels-1-link
+                    ln -s $out/nix/var/nix/profiles/per-user/github/channels-1-link $out/nix/var/nix/profiles/per-user/github/channels
                     mkdir -p $out/github/home/.nix-defexpr
                     ln -s $out/nix/var/nix/profiles/per-user/github/channels $out/github/home/.nix-defexpr/channels
                     echo "${channelURL} ${channelName}" > $out/github/home/.nix-channels
-
-                    mkdir -p $out/root/.config/git
-                    cat $gitConfigPath > $out/root/.config/git/config
                     mkdir -p $out/github/home/.config/git
                     cat $gitConfigPath > $out/github/home/.config/git/config
 
                     mkdir -p $out/bin $out/usr/bin
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
                     ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
-                  ''
-                + (lib.optionalString (flake-registry != null) ''
-                  nixCacheDir="/root/.cache/nix"
-                  mkdir -p $out$nixCacheDir
-                  globalFlakeRegistryPath="$nixCacheDir/flake-registry.json"
-                  ln -s ${flake-registry}/flake-registry.json $out$globalFlakeRegistryPath
-                  mkdir -p $out/nix/var/nix/gcroots/auto
-                  rootName=$(${pkgs.nix}/bin/nix --extra-experimental-features nix-command hash file --type sha1 --base32 <(echo -n $globalFlakeRegistryPath))
-                  ln -s $globalFlakeRegistryPath $out/nix/var/nix/gcroots/auto/$rootName
-                '');
+                  '';
             in
             pkgs.dockerTools.buildLayeredImageWithNixDb {
               name = "nixos-runner";
@@ -452,12 +447,7 @@
                 chmod u=rwxt,u=rwx,o=rwx tmp
                 chmod u=rwxt,u=rwx,o=rwx var/tmp
                 chown -R 1001:1001 nix
-                chown 1001:1001 github
-                chown 1001:1001 github/home
-                chown 1001:1001 github/home/.nix-defexpr
-                chown 1001:1001 github/home/.config
-                chown 1001:1001 github/home/.config/git
-                chown 1001:1001 github/home/.config/git/config
+                chown -R 1001:1001 github
               '';
               config = {
                 Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
