@@ -83,6 +83,7 @@
                 pkgs.reuse
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
+                pkgs.sudo
                 pkgs.tailscale
                 pkgs.which
                 pkgs.xz
@@ -109,7 +110,11 @@
                   shell = "${pkgs.bashInteractive}/bin/bash";
                   home = "/github/home";
                   gid = 1001;
-                  groups = [ "github" ];
+                  groups = [
+                    "github"
+                    "nixbld"
+                    "wheel"
+                  ];
                   description = "Github runner";
                 };
                 nobody = {
@@ -271,7 +276,7 @@
 
               sudoers = ''
                 root ALL=(ALL:ALL) SETENV:ALL
-                github ALL=(ALL:ALL) NOPASSWD:ALL SETENV:ALL
+                %wheel ALL=(ALL:ALL) NOPASSWD:ALL SETENV:ALL
               '';
 
               baseSystem =
@@ -447,6 +452,7 @@
               config = {
                 Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
                 User = "github";
+                WorkingDir = "/github/home";
                 Env = [
                   "USER=github"
                   "PATH=${
