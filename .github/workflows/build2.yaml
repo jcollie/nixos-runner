@@ -32,12 +32,8 @@ jobs:
           set
           echo $HOME
           ls -la $HOME
-          echo ${{ github.workspace }}
-          ls -la ${{ github.workspace }}
-
-      - name: Configure safe directories
-        run: |
-          git config --global safe.directory ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+          ls -la $GITHUB_WORKSPACE
 
       - name: Reuse Lint
         run: |
