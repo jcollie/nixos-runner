@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1769789167,
-        "narHash": "sha256-XBpD8PvMrKeQ7UXr8lYl+mm1tYeWX+qTTWAflzE0KtY=",
-        "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+        "lastModified": 1770841267,
+        "narHash": "sha256-BKNoPyCG5hRTJUNhwnL9PlWFujr8/18VzggAVRXl6us=",
+        "rev": "ec7c70d12ce2fc37cb92aff673dcdca89d187bae",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.05pre937308.62c838296046/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.05pre944744.ec7c70d12ce2/nixexprs.tar.xz"
       },
       "original": {
         "type": "tarball",
@@ -21,11 +21,11 @@
         "zig": "zig"
       },
       "locked": {
-        "lastModified": 1770005891,
-        "narHash": "sha256-0E4KopNQowLsTyNPTl58ABuIZk/pE/OKROfvmzhT2LI=",
+        "lastModified": 1771039463,
+        "narHash": "sha256-GlVY7CIQj6bPBLbFACZqp67ZPSRfFcKjY/JPDK8TEPE=",
         "ref": "refs/heads/main",
-        "rev": "1ceed4e3a93aadd714df01810c4c680bd11e66c0",
-        "revCount": 10,
+        "rev": "6a00ea7c05a21d27910cb0302008b001bf6e7143",
+        "revCount": 11,
         "type": "git",
         "url": "https://git.ocjtech.us/jeff/push-container.git"
       },
@@ -48,11 +48,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769905375,
-        "narHash": "sha256-99X6x4OwJOqlDib9VdW6rImpj3uEeUPKZU8VSjVB3ZY=",
+        "lastModified": 1771027958,
+        "narHash": "sha256-tpNoCFgtf+WNKUhiVuYF3ih7381ef/e8kRWrQmpLcSY=",
         "ref": "refs/heads/main",
-        "rev": "0b3d93bd2ea88670571a82092f84104ca30be4a4",
-        "revCount": 1603,
+        "rev": "844f43e0f29c47b2c6e690b4e6038774a032ed3e",
+        "revCount": 1619,
         "type": "git",
         "url": "https://git.ocjtech.us/jeff/zig-overlay.git"
       },
