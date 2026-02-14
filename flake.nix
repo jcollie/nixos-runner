@@ -423,7 +423,7 @@
             pkgs.dockerTools.buildLayeredImageWithNixDb {
               name = "nixos-runner";
               tag = "latest";
-              maxLayers = 2;
+              # maxLayers = 2;
               contents = [
                 baseSystem
               ]
