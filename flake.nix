@@ -417,6 +417,10 @@
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
                     ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
 
+                    # https://github.com/containerd/containerd/issues/12683
+                    ln --symbolic --force "$(realpath --relative-to=$out/etc $out/etc/passwd)" $out/etc/passwd
+                    ln --symbolic --force "$(realpath --relative-to=$out/etc $out/etc/group)" $out/etc/group
+
                   ''
                 + (lib.optionalString (flake-registry != null) ''
                   nixCacheDir="/root/.cache/nix"
