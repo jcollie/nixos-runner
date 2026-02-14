@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © 2023 Jeffrey C. Ollie
+# SPDX-License-Identifier: MIT
+
 name: build nixos-runner
 on:
   - push
@@ -14,11 +17,14 @@ jobs:
           attic use ${{ vars.ATTIC_CACHE }}
           nix path-info --all | LANG=C sort > before
 
+      - name: Reuse Lint
+        run: reuse lint
+
       - name: Build
         run: nix build -L .#nixos-runner
 
       - name: Push container to local registry
-        run: nix run .#push-container -- result
+        run: push-container result
         env:
           REGISTRY: ${{ vars.FORGEJO_REGISTRY }}
           REPOSITORY: ${{ vars.FORGEJO_USERNAME }}/nixos-runner
@@ -26,7 +32,7 @@ jobs:
           PASSWORD: ${{ secrets.FORGEJO_PASSWORD }}
 
       - name: Push container to docker registry
-        run: nix run .#push-container -- result
+        run: push-container result
         env:
           REGISTRY: ${{ vars.DOCKER_REGISTRY }}
           REPOSITORY: ${{ vars.DOCKER_USERNAME }}/nixos-runner

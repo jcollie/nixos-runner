@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © 2023 Jeffrey C. Ollie
+# SPDX-License-Identifier: MIT
+
 {
   description = "nixos-runner";
 
@@ -457,6 +460,16 @@
             push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
           }";
         };
+        reuse-lint =
+          let
+            program = pkgs.writeShellScriptBin "program" ''
+              ${pkgs.lib.getExe pkgs.reuse} lint
+            '';
+          in
+          {
+            type = "app";
+            program = "${pkgs.lib.getExe program}";
+          };
       });
     };
 }

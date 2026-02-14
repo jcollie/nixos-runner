@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/pinact/refs/heads/main/json-schema/pinact.json
+
+# SPDX-FileCopyrightText: © 2023 Jeffret C. Ollie
+# SPDX-License-Identifier: MIT
+
+version: 3
+files:
+  - pattern: .forgejo/workflows/*.yaml
+  - pattern: .github/workflows/*.yaml
