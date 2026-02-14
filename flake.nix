@@ -446,14 +446,12 @@
                 tmp="$(realpath --relative-to=etc etc/group)"
                 rm -f etc/group
                 cp "$tmp" etc/group
-
-                # ln --symbolic --force "$(realpath --relative-to=etc etc/passwd)" etc/passwd
-                # ln --symbolic --force "$(realpath --relative-to=etc etc/group)" etc/group
               '';
               fakeRootCommands = ''
                 chmod 4555 sbin/sudo
                 chmod 1777 tmp
                 chmod 1777 var/tmp
+                chmod 0666 nix/var/nix/db/big-lock
                 chown 1001:1001 github
                 chown 1001:1001 github/home
                 chown 1001:1001 github/home/.nix-defexpr
