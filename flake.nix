@@ -417,7 +417,7 @@
 
                     mkdir -p $out/bin $out/usr/bin
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
-                    ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
+                    # ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
                   '';
             in
             pkgs.dockerTools.buildLayeredImageWithNixDb {
@@ -442,12 +442,13 @@
                 rm -f etc/group
                 cp "$tmp" etc/group
               '';
+              enableFakechroot = true;
               fakeRootCommands = ''
-                chmod u=rws,g=rw,o=rw bin/sudo
-                chmod u=rws,g=rw,o=rw bin/nix
-                chmod u=rwxt,u=rwx,o=rwx tmp
-                chmod u=rwxt,u=rwx,o=rwx var/tmp
-                chown -R 1001:1001 github
+                chmod u=rwxt,u=rwx,o=rwx /tmp
+                chmod u=rwxt,u=rwx,o=rwx /var/tmp
+                chown -R 1001:1001 /github
+                chmod u=rws,g=rw,o=rw ${lib.getExe pkgs.sudo}
+                chmod u=rws,g=rw,o=rw ${lib.getExe pkgs.nix}
               '';
               config = {
                 Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
