@@ -451,7 +451,7 @@
                 chmod u=rws,g=rw,o=rw sbin/sudo
                 chmod u=rwxt,u=rwx,o=rwx tmp
                 chmod u=rwxt,u=rwx,o=rwx var/tmp
-                chmod -R a+rwX nix
+                chown -R 1001:1001 nix
                 chown 1001:1001 github
                 chown 1001:1001 github/home
                 chown 1001:1001 github/home/.nix-defexpr
