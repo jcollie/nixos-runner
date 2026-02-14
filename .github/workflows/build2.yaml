@@ -28,9 +28,12 @@ jobs:
 
       - name: test
         run: |
+          whoami
           set
           echo $HOME
           ls -la $HOME
+          echo ${{ github.workspace }}
+          ls -la ${{ github.workspace }}
 
       - name: Configure safe directories
         run: |

@@ -104,6 +104,14 @@
                   groups = [ "root" ];
                   description = "System administrator";
                 };
+                github = {
+                  uid = 1001;
+                  shell = "${pkgs.bashInteractive}/bin/bash";
+                  home = "/github/home";
+                  gid = 1001;
+                  groups = [ "github" ];
+                  description = "Github runner";
+                };
                 nobody = {
                   uid = 65534;
                   shell = "${pkgs.shadow}/bin/nologin";
@@ -127,6 +135,7 @@
 
               groups = {
                 root.gid = 0;
+                github.gid = 1001;
                 nixbld.gid = 30000;
                 nobody.gid = 65534;
               };
@@ -260,6 +269,11 @@
                   directory = *
               '';
 
+              sudoers = ''
+                root ALL=(ALL:ALL) SETENV:ALL
+                github ALL=(ALL:ALL) NOPASSWD:ALL SETENV:ALL
+              '';
+
               baseSystem =
                 let
                   nixpkgs = pkgs.path;
@@ -321,6 +335,7 @@
                       passwdContents
                       shadowContents
                       gitConfig
+                      sudoers
                       ;
                     passAsFile = [
                       "containerPolicy"
@@ -332,6 +347,7 @@
                       "passwdContents"
                       "shadowContents"
                       "gitConfig"
+                      "sudoers"
                     ];
                     allowSubstitutes = false;
                     preferLocalBuild = true;
@@ -348,6 +364,7 @@
                     echo "" >> $out/etc/group
                     cat $shadowContentsPath > $out/etc/shadow
                     echo "" >> $out/etc/shadow
+                    cat $sudoersPath > $out/etc/sudoers
                     mkdir -p $out/usr
                     ln -s /nix/var/nix/profiles/share $out/usr/
                     mkdir -p $out/nix/var/nix/gcroots
@@ -357,6 +374,9 @@
                     cat $nixConfContentsPath > $out/etc/nix/nix.conf
                     mkdir -p $out/root
                     mkdir -p $out/nix/var/nix/profiles/per-user/root
+                    mkdir -p $out/github
+                    mkdir -p $out/github/home
+                    mkdir -p $out/nix/var/nix/profiles/per-user/github
 
                     mkdir -p $out/etc/containers
                     mkdir -p $out/etc/containers/networks
@@ -370,6 +390,7 @@
                     ln -s ${profile} $out/nix/var/nix/profiles/default-1-link
                     ln -s $out/nix/var/nix/profiles/default-1-link $out/nix/var/nix/profiles/default
                     ln -s /nix/var/nix/profiles/default $out/root/.nix-profile
+                    ln -s /nix/var/nix/profiles/default $out/github/home/.nix-profile
                     ln -s ${channel} $out/nix/var/nix/profiles/per-user/root/channels-1-link
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
 
@@ -377,12 +398,19 @@
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels $out/root/.nix-defexpr/channels
                     echo "${channelURL} ${channelName}" > $out/root/.nix-channels
 
+                    mkdir -p $out/github/home/.nix-defexpr
+                    ln -s $out/nix/var/nix/profiles/per-user/github/channels $out/github/home/.nix-defexpr/channels
+                    echo "${channelURL} ${channelName}" > $out/github/home/.nix-channels
+
                     mkdir -p $out/root/.config/git
                     cat $gitConfigPath > $out/root/.config/git/config
+                    mkdir -p $out/github/home/.config/git
+                    cat $gitConfigPath > $out/github/home/.config/git/config
 
                     mkdir -p $out/bin $out/usr/bin
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
                     ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
+
                   ''
                 + (lib.optionalString (flake-registry != null) ''
                   nixCacheDir="/root/.cache/nix"
@@ -409,21 +437,28 @@
               fakeRootCommands = ''
                 chmod 1777 tmp
                 chmod 1777 var/tmp
+                chown 1001:1001 github
+                chown 1001:1001 github/home
+                chown 1001:1001 github/home/.nix-defexpr
+                chown 1001:1001 github/home/.config
+                chown 1001:1001 github/home/.config/git
+                chown 1001:1001 github/home/.config/git/config
               '';
               config = {
                 Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
+                User = "github";
                 Env = [
-                  "USER=root"
+                  "USER=github"
                   "PATH=${
                     lib.concatStringsSep ":" [
-                      "/root/.nix-profile/bin"
+                      "/github/home/.nix-profile/bin"
                       "/nix/var/nix/profiles/default/bin"
                       "/nix/var/nix/profiles/default/sbin"
                     ]
                   }"
                   "MANPATH=${
                     lib.concatStringsSep ":" [
-                      "/root/.nix-profile/share/man"
+                      "/github/home/.nix-profile/share/man"
                       "/nix/var/nix/profiles/default/share/man"
                     ]
                   }"
@@ -436,7 +471,7 @@
                   "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                   "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                   "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                  "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/.nix-defexpr/channels"
+                  "NIX_PATH=/nix/var/nix/profiles/per-user/github/channels:/github/home/.nix-defexpr/channels"
                 ];
               };
             };
