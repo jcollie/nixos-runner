@@ -201,7 +201,7 @@
               defaultNixConf = {
                 sandbox = "true";
                 build-users-group = "nixbld";
-                trusted-user = [
+                trusted-users = [
                   "root"
                   "github"
                 ];
@@ -442,17 +442,15 @@
                 rm -f etc/group
                 cp "$tmp" etc/group
               '';
-              enableFakechroot = true;
               fakeRootCommands = ''
-                chmod u=rwxt,u=rwx,o=rwx /tmp
-                chmod u=rwxt,u=rwx,o=rwx /var/tmp
-                chown -R 1001:1001 /github
-                chmod u=rws,g=rw,o=rw ${lib.getExe pkgs.sudo}
-                chmod u=rws,g=rw,o=rw ${lib.getExe pkgs.nix}
+                chmod u=rwxt,u=rwx,o=rwx tmp
+                chmod u=rwxt,u=rwx,o=rwx var/tmp
+                chown -R 1001:1001 github
+                chown -R 1001:1001 nix
               '';
               config = {
                 Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
-                User = "github";
+                User = "1001:1001";
                 WorkingDir = "/github/home";
                 Env = [
                   "USER=github"
