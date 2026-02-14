@@ -443,10 +443,10 @@
                 cp "$tmp" etc/group
               '';
               fakeRootCommands = ''
-                chmod u=rws,g=rw,o=rw sbin/sudo
+                chmod u=rws,g=rw,o=rw bin/sudo
+                chmod u=rws,g=rw,o=rw bin/nix
                 chmod u=rwxt,u=rwx,o=rwx tmp
                 chmod u=rwxt,u=rwx,o=rwx var/tmp
-                chown -R 1001:1001 nix
                 chown -R 1001:1001 github
               '';
               config = {
