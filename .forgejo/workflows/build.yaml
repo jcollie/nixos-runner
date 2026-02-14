@@ -12,10 +12,12 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up cache
-        run: |
-          attic login ${{ vars.ATTIC_SERVER }} ${{ vars.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
-          attic use ${{ vars.ATTIC_CACHE }}
-          nix path-info --all | LANG=C sort > before
+        uses: https://git.ocjtech.us/jeff/attic-cache@6fc49fd7a40bb6c54cb5967727d869ac79cdeb3f # v0.0.12
+        with:
+          server: ${{ vars.ATTIC_SERVER }}
+          endpoint: ${{ vars.ATTIC_ENDPOINT }}
+          token: ${{ secrets.ATTIC_TOKEN }}
+          cache: ${{ vars.ATTIC_CACHE }}
 
       - name: Reuse Lint
         run: reuse lint
@@ -38,9 +40,3 @@ jobs:
           REPOSITORY: ${{ vars.DOCKER_USERNAME }}/nixos-runner
           USERNAME: ${{ vars.DOCKER_USERNAME }}
           PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push results to cache
-        run: |
-          nix path-info --all | LANG=C sort > after
-          comm -13 before after > new
-          cat new | attic push ${{ vars.ATTIC_CACHE }} --stdin
