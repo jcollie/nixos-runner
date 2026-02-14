@@ -448,10 +448,10 @@
                 cp "$tmp" etc/group
               '';
               fakeRootCommands = ''
-                chmod 4555 sbin/sudo
-                chmod 1777 tmp
-                chmod 1777 var/tmp
-                chmod 0666 nix/var/nix/db/big-lock
+                chmod u=rws,g=rw,o=rw sbin/sudo
+                chmod u=rwxt,u=rwx,o=rwx tmp
+                chmod u=rwxt,u=rwx,o=rwx var/tmp
+                chmod -R a+rwX nix/var/nix/db
                 chown 1001:1001 github
                 chown 1001:1001 github/home
                 chown 1001:1001 github/home/.nix-defexpr
