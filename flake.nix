@@ -417,9 +417,6 @@
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
                     ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
 
-                    # https://github.com/containerd/containerd/issues/12683
-                    ln --symbolic --force "$(realpath --relative-to=$out/etc $out/etc/passwd)" $out/etc/passwd
-                    ln --symbolic --force "$(realpath --relative-to=$out/etc $out/etc/group)" $out/etc/group
 
                   ''
                 + (lib.optionalString (flake-registry != null) ''
@@ -443,6 +440,10 @@
               extraCommands = ''
                 rm -rf nix-support
                 ln -s /nix/var/nix/profiles nix/var/nix/gcroots/profiles
+
+                # https://github.com/containerd/containerd/issues/12683
+                ln --symbolic --force "$(realpath --relative-to=etc etc/passwd)" etc/passwd
+                ln --symbolic --force "$(realpath --relative-to=etc etc/group)" etc/group
               '';
               fakeRootCommands = ''
                 chmod 1777 tmp
