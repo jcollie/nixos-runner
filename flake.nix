@@ -140,6 +140,7 @@
 
               groups = {
                 root.gid = 0;
+                wheel.gid = 1;
                 github.gid = 1001;
                 nixbld.gid = 30000;
                 nobody.gid = 65534;
