@@ -435,27 +435,16 @@
                 ];
               };
             };
-          # push-container = pkgs.writeTextFile {
-          #   name = "push-container";
-          #   destination = "/bin/push-container";
-          #   text = lib.concatStringsSep "\n" [
-          #     "#!${lib.getExe pkgs.nushell}"
-          #     ""
-          #     "alias regctl = ^${pkgs.regctl}/bin/regctl"
-          #     "alias gzip = ^${pkgs.gzip}/bin/gzip"
-          #     ""
-          #     (builtins.readFile ./push-container.nu)
-          #   ];
-          #   executable = true;
-          # };
         }
       );
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
           name = "nixos-runner";
           nativeBuildInputs = [
-            pkgs.regctl
             pkgs.gzip
+            pkgs.pinact
+            pkgs.regctl
+            pkgs.reuse
             push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
           ];
 
