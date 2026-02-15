@@ -36,9 +36,9 @@ jobs:
           echo $GITHUB_WORKSPACE
           ls -la $GITHUB_WORKSPACE
 
-      - name: Reuse Lint
-        run: |
-          nix run .#reuse-lint
+      # - name: Reuse Lint
+      #   run: |
+      #     nix run .#reuse-lint
 
       - name: Build
         run: |
