@@ -122,9 +122,7 @@
                 pkgs.podman
                 pkgs.reuse
                 pkgs.regctl
-                pkgs.shadow.su
                 pkgs.stdenv.cc.cc.lib
-                pkgs.sudo
                 pkgs.tailscale
                 pkgs.which
                 pkgs.xz
@@ -316,12 +314,7 @@
 
               gitConfig = ''
                 [safe]
-                  directory = *
-              '';
-
-              sudoers = ''
-                root ALL=(ALL:ALL) NOPASSWD:ALL SETENV:ALL
-                %wheel ALL=(ALL:ALL) NOPASSWD:ALL SETENV:ALL
+                  directory = /__w/nixos-runner/nixos-runner
               '';
 
               baseSystem =
@@ -385,7 +378,6 @@
                       passwdContents
                       shadowContents
                       gitConfig
-                      sudoers
                       ;
                     passAsFile = [
                       "containerPolicy"
@@ -397,7 +389,6 @@
                       "passwdContents"
                       "shadowContents"
                       "gitConfig"
-                      "sudoers"
                     ];
                     allowSubstitutes = false;
                     preferLocalBuild = true;
@@ -416,13 +407,6 @@
 
                     cat $shadowContentsPath > $out/etc/shadow
                     echo "" >> $out/etc/shadow
-
-                    cat $sudoersPath > $out/etc/sudoers
-                    echo "" >> $out/etc/sudoers
-
-                    mkdir -p $out/etc/pam.d
-                    cat $pamSuPath > $out/etc/pam.d/su
-                    echo "" >> $out/etc/pam.d/su
 
                     mkdir -p $out/etc/nix
                     cat $nixConfContentsPath > $out/etc/nix/nix.conf
