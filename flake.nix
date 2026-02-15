@@ -409,6 +409,9 @@
                     cat $shadowContentsPath > $out/etc/shadow
                     echo "" >> $out/etc/shadow
 
+                    cat $gitConfigPath > $out/etc/gitconfig
+                    echo "" >> $out/etc/gitconfig
+
                     mkdir -p $out/etc/nix
                     cat $nixConfContentsPath > $out/etc/nix/nix.conf
                     echo "" >> $out/etc/nix/nix.conf
