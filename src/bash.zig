@@ -8,7 +8,7 @@ const lib = @import("lib.zig");
 
 pub fn main(init: std.process.Init) !void {
     const arena: std.mem.Allocator = init.arena.allocator();
-    const io = init.io;
+    // const io = init.io;
 
     var environ_map = try lib.fixupEnvironMap(arena, init.environ_map, .user);
     defer environ_map.deinit();
@@ -16,7 +16,7 @@ pub fn main(init: std.process.Init) !void {
     var argv: std.ArrayList([]const u8) = .empty;
     defer argv.deinit(arena);
 
-    try argv.append(arena, options.bash);
+    try argv.append(arena, "bash");
 
     var it = try init.minimal.args.iterateAllocator(arena);
     defer it.deinit();
@@ -28,10 +28,12 @@ pub fn main(init: std.process.Init) !void {
 
     try lib.switchToUser();
 
-    const err = std.process.replace(io, .{
-        .argv = argv.items,
-        .environ_map = &environ_map,
-    });
+    try lib.exec(init.gpa, options.bash, argv, &environ_map);
 
-    std.debug.print("unable to execute: {t}\n", .{err});
+    // const err = std.process.replace(io, .{
+    //     .argv = argv.items,
+    //     .environ_map = &environ_map,
+    // });
+
+    // std.debug.print("unable to execute: {t}\n", .{err});
 }
