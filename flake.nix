@@ -240,6 +240,8 @@
               groupContents = (lib.concatStringsSep "\n" (lib.attrValues (lib.mapAttrs groupToGroup groups)));
 
               defaultNixConf = {
+                cores = "1";
+                max-jobs = "1";
                 sandbox = "true";
                 build-users-group = "nixbld";
                 trusted-users = [
