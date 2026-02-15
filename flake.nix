@@ -498,6 +498,7 @@
                       ]
                     );
                     username = "github";
+                    homedir = "/github/home";
                     zig = zig.packages.${pkgs.stdenv.hostPlatform.system}.master;
                   };
                 in

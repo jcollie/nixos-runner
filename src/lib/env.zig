@@ -4,7 +4,11 @@
 const std = @import("std");
 const options = @import("options");
 
-pub fn fixupEnvironMap(alloc: std.mem.Allocator, old: *const std.process.Environ.Map) (std.mem.Allocator.Error || std.Io.Writer.Error)!std.process.Environ.Map {
+pub fn fixupEnvironMap(
+    alloc: std.mem.Allocator,
+    old: *const std.process.Environ.Map,
+    user: enum { root, user },
+) (std.mem.Allocator.Error || std.Io.Writer.Error)!std.process.Environ.Map {
     var new = try old.clone(alloc);
     errdefer new.deinit();
 
@@ -28,7 +32,16 @@ pub fn fixupEnvironMap(alloc: std.mem.Allocator, old: *const std.process.Environ
         try new.put("PATH", writer.written());
     }
 
-    try new.put("USER", options.username);
+    switch (user) {
+        .root => {
+            try new.put("USER", "root");
+            try new.put("HOME", "/root");
+        },
+        .user => {
+            try new.put("USER", options.username);
+            try new.put("HOME", "/github/home");
+        },
+    }
 
     return new;
 }

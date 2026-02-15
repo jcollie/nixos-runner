@@ -54,6 +54,7 @@ pub fn build(b: *std.Build) !void {
     const gid = b.option(u32, "gid", "gid to run as") orelse 1001;
     const groups = b.option([]const u8, "groups", "list of supplemental groups") orelse "1001";
     const username = b.option([]const u8, "username", "username to run as") orelse "github";
+    const homedir = b.option([]const u8, "homedir", "home directory of user") orelse "/github/home";
     const tail = tail: {
         const tail = b.option([]const u8, "tail", "real tail binary") orelse try find(b, "tail");
         if (!std.mem.eql(u8, std.fs.path.basename(tail), "coreutils")) break :tail tail;
@@ -62,6 +63,12 @@ pub fn build(b: *std.Build) !void {
     };
     const nix = b.option([]const u8, "nix", "real nix binary") orelse try find(b, "nix");
     const bash = b.option([]const u8, "bash", "real bash binary") orelse try find(b, "bash");
+    const sh = sh: {
+        const sh = b.option([]const u8, "sh", "real sh binary") orelse try find(b, "sh");
+        if (!std.mem.eql(u8, std.fs.path.basename(sh), "sh")) break :sh sh;
+        const dir = std.fs.path.dirname(sh) orelse break :sh sh;
+        break :sh try std.fs.path.join(b.allocator, &.{ dir, "sh" });
+    };
 
     const options = b.addOptions();
     options.addOption(u32, "uid", uid);
@@ -76,9 +83,11 @@ pub fn build(b: *std.Build) !void {
         break :groups list.items;
     });
     options.addOption([]const u8, "username", username);
+    options.addOption([]const u8, "homedir", homedir);
     options.addOption([]const u8, "tail", tail);
     options.addOption([]const u8, "nix", nix);
     options.addOption([]const u8, "bash", bash);
+    options.addOption([]const u8, "sh", sh);
 
     const execas_exe = b.addExecutable(.{
         .name = b.fmt("execas-{d}", .{uid}),
@@ -135,9 +144,30 @@ pub fn build(b: *std.Build) !void {
     b.installArtifact(bash_exe);
 
     const bash_tests = b.addTest(.{
-        .root_module = tail_exe.root_module,
+        .root_module = bash_exe.root_module,
     });
 
     const run_bash_tests = b.addRunArtifact(bash_tests);
     test_step.dependOn(&run_bash_tests.step);
+
+    const sh_exe = b.addExecutable(.{
+        .name = "sh",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/sh.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+        .use_llvm = false,
+        .use_lld = false,
+    });
+    sh_exe.root_module.addOptions("options", options);
+
+    b.installArtifact(sh_exe);
+
+    const sh_tests = b.addTest(.{
+        .root_module = sh_exe.root_module,
+    });
+
+    const run_sh_tests = b.addRunArtifact(sh_tests);
+    test_step.dependOn(&run_sh_tests.step);
 }

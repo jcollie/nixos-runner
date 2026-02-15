@@ -10,9 +10,6 @@ pub fn main(init: std.process.Init) !void {
     const arena: std.mem.Allocator = init.arena.allocator();
     const io = init.io;
 
-    var environ_map = try lib.fixupEnvironMap(arena, init.environ_map);
-    defer environ_map.deinit();
-
     nix: {
         if (!std.mem.eql(u8, init.environ_map.get("CI") orelse break :nix, "true")) break :nix;
         if (!std.mem.eql(u8, init.environ_map.get("GITHUB_ACTIONS") orelse break :nix, "true")) break :nix;
@@ -25,6 +22,9 @@ pub fn main(init: std.process.Init) !void {
         if (!std.mem.eql(u8, it.next() orelse break :nix, "/dev/null")) break :nix;
         if (it.next() != null) break :nix;
 
+        var environ_map = try lib.fixupEnvironMap(arena, init.environ_map, .root);
+        defer environ_map.deinit();
+
         cwd: {
             var dir = std.Io.Dir.openDirAbsolute(io, "/", .{}) catch break :cwd;
             defer dir.close(io);
@@ -35,7 +35,6 @@ pub fn main(init: std.process.Init) !void {
             .argv = &.{
                 options.nix,
                 "daemon",
-                "--trusted",
             },
             .environ_map = &environ_map,
         });
@@ -43,6 +42,9 @@ pub fn main(init: std.process.Init) !void {
         std.debug.print("unable to execute: {t}\n", .{err});
         return;
     }
+
+    var environ_map = try lib.fixupEnvironMap(arena, init.environ_map, .user);
+    defer environ_map.deinit();
 
     var argv: std.ArrayList([]const u8) = .empty;
     defer argv.deinit(arena);
@@ -57,7 +59,7 @@ pub fn main(init: std.process.Init) !void {
         try argv.append(arena, arg);
     }
 
-    try lib.setUID();
+    try lib.switchToUser();
 
     const err = std.process.replace(io, .{
         .argv = argv.items,

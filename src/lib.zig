@@ -4,9 +4,9 @@
 const std = @import("std");
 
 pub const fixupEnvironMap = @import("lib/env.zig").fixupEnvironMap;
-pub const setUID = @import("lib/setuid.zig").setUID;
+pub const switchToUser = @import("lib/switchtouser.zig").switchToUser;
 
 test {
     _ = @import("lib/env.zig");
-    _ = @import("lib/setuid.zig");
+    _ = @import("lib/switchtouser.zig");
 }

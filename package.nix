@@ -8,6 +8,7 @@
   uid,
   gid,
   username,
+  homedir,
   groups,
   coreutils-full,
   bashInteractive,
@@ -25,9 +26,11 @@ stdenv.mkDerivation (finalAttrs: {
     "-Dgid=${toString gid}"
     "-Dgroups=${groups}"
     "-Dusername=${username}"
+    "-Dhomedir=${homedir}"
     "-Dtail=${lib.getExe' coreutils-full "tail"}"
     "-Dnix=${lib.getExe' nix "nix"}"
     "-Dbash=${lib.getExe' bashInteractive "bash"}"
+    "-Dsh=${lib.getExe' bashInteractive "sh"}"
   ];
   meta = {
     mainProgram = "execas-${toString uid}";

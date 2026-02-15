@@ -4,7 +4,7 @@
 const std = @import("std");
 const options = @import("options");
 
-pub fn setUID() !void {
+pub fn switchToUser() !void {
     {
         const rc = std.os.linux.setgroups(options.groups.len, options.groups.ptr);
         switch (std.os.linux.errno(rc)) {

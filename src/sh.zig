@@ -6,7 +6,7 @@ const options = @import("options");
 
 const lib = @import("lib.zig");
 
-pub fn main(init: std.process.Init) !void {
+pub fn main(init: std.process.Init) !u8 {
     const arena: std.mem.Allocator = init.arena.allocator();
     const io = init.io;
 
@@ -16,7 +16,7 @@ pub fn main(init: std.process.Init) !void {
     var argv: std.ArrayList([]const u8) = .empty;
     defer argv.deinit(arena);
 
-    try argv.append(arena, options.bash);
+    try argv.append(arena, options.sh);
 
     var it = try init.minimal.args.iterateAllocator(arena);
     defer it.deinit();
@@ -34,4 +34,6 @@ pub fn main(init: std.process.Init) !void {
     });
 
     std.debug.print("unable to execute: {t}\n", .{err});
+
+    return 127;
 }
