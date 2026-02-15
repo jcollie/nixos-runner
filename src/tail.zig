@@ -31,16 +31,17 @@ pub fn main(init: std.process.Init) !void {
             std.process.setCurrentDir(io, dir) catch break :cwd;
         }
 
-        const err = std.process.replace(io, .{
-            .argv = &.{
-                options.nix,
-                "daemon",
-            },
-            .environ_map = &environ_map,
-        });
+        try lib.exec(init.gpa, options.nix, &.{ "nix", "daemon" }, &environ_map);
+        // const err = std.process.replace(io, .{
+        //     .argv = &.{
+        //         options.nix,
+        //         "daemon",
+        //     },
+        //     .environ_map = &environ_map,
+        // });
 
-        std.debug.print("unable to execute: {t}\n", .{err});
-        return;
+        // std.debug.print("unable to execute: {t}\n", .{err});
+        // return;
     }
 
     var environ_map = try lib.fixupEnvironMap(arena, init.environ_map, .user);
@@ -49,7 +50,7 @@ pub fn main(init: std.process.Init) !void {
     var argv: std.ArrayList([]const u8) = .empty;
     defer argv.deinit(arena);
 
-    try argv.append(arena, options.tail);
+    try argv.append(arena, "tail");
 
     var it = try init.minimal.args.iterateAllocator(arena);
     defer it.deinit();
@@ -61,10 +62,12 @@ pub fn main(init: std.process.Init) !void {
 
     try lib.switchToUser();
 
-    const err = std.process.replace(io, .{
-        .argv = argv.items,
-        .environ_map = &environ_map,
-    });
+    try lib.exec(init.gpa, options.tail, argv.items, &environ_map);
 
-    std.debug.print("unable to execute: {t}\n", .{err});
+    // const err = std.process.replace(io, .{
+    //     .argv = argv.items,
+    //     .environ_map = &environ_map,
+    // });
+
+    // std.debug.print("unable to execute: {t}\n", .{err});
 }

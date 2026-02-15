@@ -4,15 +4,13 @@
 const std = @import("std");
 const options = @import("options");
 
+const lib = @import("lib.zig");
+
 pub fn main(init: std.process.Init) !void {
     const arena: std.mem.Allocator = init.arena.allocator();
     const io = init.io;
 
-    const rc = std.os.linux.setuid(options.uid);
-    switch (std.os.linux.errno(rc)) {
-        .SUCCESS => {},
-        else => |err| return std.posix.unexpectedErrno(err),
-    }
+    try lib.switchToUser();
 
     var argv: std.ArrayList([]const u8) = .empty;
 

@@ -16,19 +16,16 @@ pub fn main(init: std.process.Init) !void {
     var argv: std.ArrayList([]const u8) = .empty;
     defer argv.deinit(arena);
 
-    try argv.append(arena, "bash");
-
     var it = try init.minimal.args.iterateAllocator(arena);
     defer it.deinit();
 
-    _ = it.next();
     while (it.next()) |arg| {
         try argv.append(arena, arg);
     }
 
     try lib.switchToUser();
 
-    try lib.exec(init.gpa, options.bash, argv, &environ_map);
+    try lib.exec(init.gpa, options.bash, argv.items, &environ_map);
 
     // const err = std.process.replace(io, .{
     //     .argv = argv.items,

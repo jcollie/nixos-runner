@@ -19,8 +19,8 @@ pub fn exec(gpa: std.mem.Allocator, path: []const u8, argv: []const []const u8, 
     const rc = std.os.linux.execve(
         path0.ptr,
         argv0.ptr,
-        block,
+        block.slice,
     );
 
-    return std.posix.unexpectedErrno(rc);
+    return std.posix.unexpectedErrno(std.os.linux.errno(rc));
 }

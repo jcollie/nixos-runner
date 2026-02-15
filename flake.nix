@@ -242,6 +242,7 @@
               defaultNixConf = {
                 cores = "1";
                 max-jobs = "1";
+                http-connections = "5";
                 sandbox = "true";
                 build-users-group = "nixbld";
                 trusted-users = [
