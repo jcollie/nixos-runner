@@ -18,14 +18,16 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "zig": "zig"
+        "zig": [
+          "zig"
+        ]
       },
       "locked": {
-        "lastModified": 1771090423,
-        "narHash": "sha256-LXgGCQwxq4FVFGz9y67u4mRJ2/IcR6DzGAeozibGzio=",
+        "lastModified": 1771097473,
+        "narHash": "sha256-rdwLgKpTuxXwoYZ+Bb4G3AGWllqsUa0hYebhy7rvRvU=",
         "ref": "refs/heads/main",
-        "rev": "16258dc104bead08b93ef424315f8404ba3cf34f",
-        "revCount": 17,
+        "rev": "66fddd025358abde9935f8d3398506bc854eeea1",
+        "revCount": 18,
         "type": "git",
         "url": "https://git.ocjtech.us/jeff/push-container.git"
       },
@@ -37,22 +39,22 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "push-container": "push-container"
+        "push-container": "push-container",
+        "zig": "zig"
       }
     },
     "zig": {
       "inputs": {
         "nixpkgs": [
-          "push-container",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1771027958,
-        "narHash": "sha256-tpNoCFgtf+WNKUhiVuYF3ih7381ef/e8kRWrQmpLcSY=",
+        "lastModified": 1771099964,
+        "narHash": "sha256-xIg8XsZ5CqMrjmArTrcd1SEPm927gqqHAauLIs43bfk=",
         "ref": "refs/heads/main",
-        "rev": "844f43e0f29c47b2c6e690b4e6038774a032ed3e",
-        "revCount": 1619,
+        "rev": "4310fcb250a29bcb86ba95466754573ba033810e",
+        "revCount": 1620,
         "type": "git",
         "url": "https://git.ocjtech.us/jeff/zig-overlay.git"
       },

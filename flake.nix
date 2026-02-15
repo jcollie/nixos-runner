@@ -12,6 +12,13 @@
       url = "git+https://git.ocjtech.us/jeff/push-container.git";
       inputs = {
         nixpkgs.follows = "nixpkgs";
+        zig.follows = "zig";
+      };
+    };
+    zig = {
+      url = "git+https://git.ocjtech.us/jeff/zig-overlay.git";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
       };
     };
   };
@@ -21,12 +28,43 @@
       self,
       nixpkgs,
       push-container,
+      zig,
     }:
     let
       makePackages =
         system:
         import nixpkgs {
           inherit system;
+          overlays = [
+            # (final: prev: {
+            #   util-linux = prev.util-linux.override {
+            #     pamSupport = false;
+            #   };
+            # })
+            # (final: prev: {
+            #   nix = prev.nix.overrideAttrs (old: {
+            #     postInstall = ''
+            #       chmod u+s $out/bin/nix
+            #     '';
+            #   });
+            # })
+            (final: prev: {
+              docker_29 = prev.docker_29.override {
+                clientOnly = true;
+              };
+            })
+            # (final: prev: {
+            #   git = prev.git.override {
+            #     perlSupport = false;
+            #     pythonSupport = false;
+            #     svnSupport = false;
+            #     sendEmailSupport = false;
+            #     withManual = false;
+            #     withSsh = true;
+            #     openssh = prev.openssh;
+            #   };
+            # })
+          ];
         };
       forAllSystems = (
         function:
@@ -42,9 +80,9 @@
           lib = pkgs.lib;
         in
         {
-          docker-client = pkgs.docker_28.override {
-            clientOnly = true;
-          };
+          # docker-client = pkgs.docker_29.override {
+          #   clientOnly = true;
+          # };
           git = pkgs.git.override {
             perlSupport = false;
             pythonSupport = false;
@@ -64,9 +102,11 @@
                 pkgs.bind.dnsutils
                 pkgs.coreutils-full
                 pkgs.curl
+                pkgs.docker_29
                 pkgs.forgejo-cli
                 pkgs.gawk
                 pkgs.gh
+                # pkgs.git
                 pkgs.glibc
                 pkgs.gnugrep
                 pkgs.gnused
@@ -82,6 +122,7 @@
                 pkgs.podman
                 pkgs.reuse
                 pkgs.regctl
+                pkgs.shadow.su
                 pkgs.stdenv.cc.cc.lib
                 pkgs.sudo
                 pkgs.tailscale
@@ -89,7 +130,8 @@
                 pkgs.xz
                 pkgs.zstd
 
-                self.packages.${pkgs.stdenv.hostPlatform.system}.docker-client
+                # self.packages.${pkgs.stdenv.hostPlatform.system}.sudo
+                # self.packages.${pkgs.stdenv.hostPlatform.system}.docker-client
                 self.packages.${pkgs.stdenv.hostPlatform.system}.git
                 push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
               ];
@@ -278,7 +320,7 @@
               '';
 
               sudoers = ''
-                root ALL=(ALL:ALL) SETENV:ALL
+                root ALL=(ALL:ALL) NOPASSWD:ALL SETENV:ALL
                 %wheel ALL=(ALL:ALL) NOPASSWD:ALL SETENV:ALL
               '';
 
@@ -362,22 +404,35 @@
                   }
                   ''
                     mkdir -p $out/etc
+
                     mkdir -p $out/etc/ssl/certs
                     ln -s /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt $out/etc/ssl/certs
+
                     cat $passwdContentsPath > $out/etc/passwd
                     echo "" >> $out/etc/passwd
+
                     cat $groupContentsPath > $out/etc/group
                     echo "" >> $out/etc/group
+
                     cat $shadowContentsPath > $out/etc/shadow
                     echo "" >> $out/etc/shadow
+
                     cat $sudoersPath > $out/etc/sudoers
+                    echo "" >> $out/etc/sudoers
+
+                    mkdir -p $out/etc/pam.d
+                    cat $pamSuPath > $out/etc/pam.d/su
+                    echo "" >> $out/etc/pam.d/su
+
+                    mkdir -p $out/etc/nix
+                    cat $nixConfContentsPath > $out/etc/nix/nix.conf
+                    echo "" >> $out/etc/nix/nix.conf
+
                     mkdir -p $out/usr
                     ln -s /nix/var/nix/profiles/share $out/usr/
                     mkdir -p $out/nix/var/nix/gcroots
                     mkdir -p $out/tmp
                     mkdir -p $out/var/tmp
-                    mkdir -p $out/etc/nix
-                    cat $nixConfContentsPath > $out/etc/nix/nix.conf
 
                     mkdir -p $out/etc/containers
                     mkdir -p $out/etc/containers/networks
@@ -417,7 +472,6 @@
 
                     mkdir -p $out/bin $out/usr/bin
                     ln -s ${pkgs.coreutils}/bin/env $out/usr/bin/env
-                    # ln -s ${pkgs.bashInteractive}/bin/bash $out/bin/sh
                   '';
             in
             pkgs.dockerTools.buildLayeredImageWithNixDb {
@@ -446,39 +500,52 @@
                 chmod u=rwxt,u=rwx,o=rwx tmp
                 chmod u=rwxt,u=rwx,o=rwx var/tmp
                 chown -R 1001:1001 github
-                chown -R 1001:1001 nix
+                # chown -R 1001:1001 nix
               '';
-              config = {
-                Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
-                User = "1001:1001";
-                WorkingDir = "/github/home";
-                Env = [
-                  "USER=github"
-                  "PATH=${
-                    lib.concatStringsSep ":" [
-                      "/github/home/.nix-profile/bin"
-                      "/nix/var/nix/profiles/default/bin"
-                      "/nix/var/nix/profiles/default/sbin"
-                    ]
-                  }"
-                  "MANPATH=${
-                    lib.concatStringsSep ":" [
-                      "/github/home/.nix-profile/share/man"
-                      "/nix/var/nix/profiles/default/share/man"
-                    ]
-                  }"
-                  "LD_LIBRARY_PATH=${
-                    pkgs.lib.makeLibraryPath [
-                      pkgs.glibc
-                      pkgs.stdenv.cc.cc.lib
-                    ]
-                  }"
-                  "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                  "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                  "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                  "NIX_PATH=/nix/var/nix/profiles/per-user/github/channels:/github/home/.nix-defexpr/channels"
-                ];
-              };
+              config =
+                let
+                  execas = pkgs.callPackage ./package.nix {
+                    uid = 1001;
+                    zig = zig.packages.${pkgs.stdenv.hostPlatform.system}.master;
+                  };
+                  entrypoint = pkgs.writeShellScriptBin "setup" ''
+                    ${lib.getExe pkgs.nix} daemon --trusted >/dev/null 2>&1 &
+
+                    exec ${lib.getExe execas} "$@"
+                  '';
+                in
+                {
+                  Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
+                  User = "0:0";
+                  WorkingDir = "/github/home";
+                  Entrypoint = [ "${lib.getExe entrypoint}" ];
+                  Env = [
+                    "USER=github"
+                    "PATH=${
+                      lib.concatStringsSep ":" [
+                        "/github/home/.nix-profile/bin"
+                        "/nix/var/nix/profiles/default/bin"
+                        "/nix/var/nix/profiles/default/sbin"
+                      ]
+                    }"
+                    "MANPATH=${
+                      lib.concatStringsSep ":" [
+                        "/github/home/.nix-profile/share/man"
+                        "/nix/var/nix/profiles/default/share/man"
+                      ]
+                    }"
+                    "LD_LIBRARY_PATH=${
+                      pkgs.lib.makeLibraryPath [
+                        pkgs.glibc
+                        pkgs.stdenv.cc.cc.lib
+                      ]
+                    }"
+                    "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                    "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                    "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                    "NIX_PATH=/nix/var/nix/profiles/per-user/github/channels:/github/home/.nix-defexpr/channels"
+                  ];
+                };
             };
         }
       );
@@ -490,6 +557,7 @@
             pkgs.pinact
             pkgs.regctl
             pkgs.reuse
+            zig.packages.${pkgs.stdenv.hostPlatform.system}.master
             push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
           ];
 

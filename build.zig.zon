@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: © 2023 Jeffrey C. Ollie
+// SPDX-License-Identifier: MIT
+
+.{
+    .name = .execas,
+    .version = "0.0.1",
+    .fingerprint = 0xd3da9c6c90740108, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.16.0-dev.2596+469bf6af0",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSES",
+    },
+}
