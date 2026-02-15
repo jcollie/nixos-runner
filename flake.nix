@@ -334,7 +334,7 @@
                       echo "[]" > $out/manifest.nix
                     fi
                   '';
-                  rootEnv = pkgs.buildPackages.buildEnv {
+                  userEnv = pkgs.buildPackages.buildEnv {
                     name = "root-profile-env";
                     paths = defaultPkgs;
                   };
@@ -369,7 +369,7 @@
                   '';
                   profile = pkgs.buildPackages.runCommand "user-environment" { } ''
                     mkdir $out
-                    cp -a ${rootEnv}/* $out/
+                    cp -a ${userEnv}/* $out/
                     ln -s ${manifest} $out/manifest.nix
                   '';
                 in
@@ -477,7 +477,6 @@
             pkgs.dockerTools.buildLayeredImageWithNixDb {
               name = "nixos-runner";
               tag = "latest";
-              # maxLayers = 2;
               contents = [
                 baseSystem
               ]
@@ -500,37 +499,36 @@
                 chmod u=rwxt,u=rwx,o=rwx tmp
                 chmod u=rwxt,u=rwx,o=rwx var/tmp
                 chown -R 1001:1001 github
-                # chown -R 1001:1001 nix
               '';
               config =
-                let
-                  execas = pkgs.callPackage ./package.nix {
-                    uid = 1001;
-                    zig = zig.packages.${pkgs.stdenv.hostPlatform.system}.master;
-                  };
-                  entrypoint = pkgs.writeShellScriptBin "setup" ''
-                    ${lib.getExe pkgs.nix} daemon --trusted >/dev/null 2>&1 &
+                # let
+                #   execas-github = pkgs.callPackage ./package.nix {
+                #     uid = 1001;
+                #     zig = zig.packages.${pkgs.stdenv.hostPlatform.system}.master;
+                #   };
+                #   entrypoint = pkgs.writeShellScriptBin "setup" ''
+                #     ${lib.getExe pkgs.nix} daemon --trusted >/dev/null 2>&1 &
 
-                    exec ${lib.getExe execas} "$@"
-                  '';
-                in
+                #     exec ${lib.getExe execas-github} "$@"
+                #   '';
+                # in
                 {
                   Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
                   User = "0:0";
-                  WorkingDir = "/github/home";
-                  Entrypoint = [ "${lib.getExe entrypoint}" ];
+                  # WorkingDir = "/github/home";
+                  # Entrypoint = [ "${lib.getExe entrypoint}" ];
                   Env = [
-                    "USER=github"
+                    "USER=root"
                     "PATH=${
                       lib.concatStringsSep ":" [
-                        "/github/home/.nix-profile/bin"
+                        "/root/.nix-profile/bin"
                         "/nix/var/nix/profiles/default/bin"
                         "/nix/var/nix/profiles/default/sbin"
                       ]
                     }"
                     "MANPATH=${
                       lib.concatStringsSep ":" [
-                        "/github/home/.nix-profile/share/man"
+                        "/root/.nix-profile/share/man"
                         "/nix/var/nix/profiles/default/share/man"
                       ]
                     }"
@@ -543,7 +541,7 @@
                     "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                    "NIX_PATH=/nix/var/nix/profiles/per-user/github/channels:/github/home/.nix-defexpr/channels"
+                    "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/home/.nix-defexpr/channels"
                   ];
                 };
             };

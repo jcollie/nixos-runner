@@ -13,7 +13,7 @@ pub fn build(b: *std.Build) !void {
     options.addOption(u32, "uid", uid);
 
     const exe = b.addExecutable(.{
-        .name = "execas",
+        .name = b.fmt("execas-{d}", .{uid}),
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/main.zig"),
             .target = target,

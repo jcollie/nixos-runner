@@ -9,7 +9,7 @@
   ...
 }:
 stdenv.mkDerivation (finalAttrs: {
-  name = "execas";
+  name = "execas-${toString uid}";
   src = lib.cleanSource ./.;
   nativeBuildInputs = [
     zig
@@ -18,7 +18,7 @@ stdenv.mkDerivation (finalAttrs: {
     "-Duid=${toString uid}"
   ];
   meta = {
-    mainProgram = "execas";
+    mainProgram = "execas-${toString uid}";
     license = lib.licenses.mit;
   };
 })
