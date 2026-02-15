@@ -6,7 +6,10 @@
   stdenv,
   zig,
   uid,
-  coreutils,
+  gid,
+  username,
+  groups,
+  coreutils-full,
   bashInteractive,
   nix,
   ...
@@ -19,7 +22,10 @@ stdenv.mkDerivation (finalAttrs: {
   ];
   zigBuildFlags = [
     "-Duid=${toString uid}"
-    "-Dtail=${lib.getExe' coreutils "tail"}"
+    "-Dgid=${toString gid}"
+    "-Dgroups=${groups}"
+    "-Dusername=${username}"
+    "-Dtail=${lib.getExe' coreutils-full "tail"}"
     "-Dnix=${lib.getExe' nix "nix"}"
     "-Dbash=${lib.getExe' bashInteractive "bash"}"
   ];

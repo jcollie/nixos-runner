@@ -120,6 +120,7 @@
                 pkgs.nushell
                 pkgs.pinact
                 pkgs.podman
+                pkgs.procps
                 pkgs.reuse
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
@@ -488,6 +489,15 @@
                 let
                   execas-github = pkgs.callPackage ./package.nix {
                     uid = 1001;
+                    gid = 1001;
+                    groups = lib.concatStringsSep "," (
+                      map toString [
+                        groups.wheel.gid
+                        groups.github.gid
+                        groups.nixbld.gid
+                      ]
+                    );
+                    username = "github";
                     zig = zig.packages.${pkgs.stdenv.hostPlatform.system}.master;
                   };
                 in

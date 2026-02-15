@@ -51,6 +51,8 @@ pub fn build(b: *std.Build) !void {
     const test_step = b.step("test", "Run tests");
 
     const uid = b.option(u32, "uid", "uid to run as") orelse 1001;
+    const gid = b.option(u32, "gid", "gid to run as") orelse 1001;
+    const groups = b.option([]const u8, "groups", "list of supplemental groups") orelse "1001";
     const username = b.option([]const u8, "username", "username to run as") orelse "github";
     const tail = tail: {
         const tail = b.option([]const u8, "tail", "real tail binary") orelse try find(b, "tail");
@@ -63,6 +65,16 @@ pub fn build(b: *std.Build) !void {
 
     const options = b.addOptions();
     options.addOption(u32, "uid", uid);
+    options.addOption(u32, "gid", gid);
+    options.addOption([]const u32, "groups", groups: {
+        var list: std.ArrayList(u32) = .empty;
+        var it = std.mem.splitScalar(u8, groups, ',');
+        while (it.next()) |v| {
+            const g = try std.fmt.parseUnsigned(u32, v, 10);
+            try list.append(b.allocator, g);
+        }
+        break :groups list.items;
+    });
     options.addOption([]const u8, "username", username);
     options.addOption([]const u8, "tail", tail);
     options.addOption([]const u8, "nix", nix);

@@ -21,7 +21,7 @@ pub fn fixupEnvironMap(alloc: std.mem.Allocator, old: *const std.process.Environ
         defer writer.deinit();
 
         while (it.next()) |entry| : (index += 1) {
-            if (index != 0) try writer.writer.writeByte(std.fs.path.sep);
+            if (index != 0) try writer.writer.writeByte(':');
             try writer.writer.writeAll(entry);
         }
 
