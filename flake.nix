@@ -314,7 +314,7 @@
 
               gitConfig = ''
                 [safe]
-                  directory = /__w/nixos-runner/nixos-runner
+                ''\tdirectory = *
               '';
 
               baseSystem =
