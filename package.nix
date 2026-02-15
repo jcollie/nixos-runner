@@ -6,6 +6,9 @@
   stdenv,
   zig,
   uid,
+  coreutils,
+  bashInteractive,
+  nix,
   ...
 }:
 stdenv.mkDerivation (finalAttrs: {
@@ -16,6 +19,9 @@ stdenv.mkDerivation (finalAttrs: {
   ];
   zigBuildFlags = [
     "-Duid=${toString uid}"
+    "-Dtail=${lib.getExe' coreutils "tail"}"
+    "-Dnix=${lib.getExe' nix "nix"}"
+    "-Dbash=${lib.getExe' bashInteractive "bash"}"
   ];
   meta = {
     mainProgram = "execas-${toString uid}";

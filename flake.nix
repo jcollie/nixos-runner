@@ -485,19 +485,14 @@
                 chown -R 1001:1001 github
               '';
               config =
-                # let
-                #   execas-github = pkgs.callPackage ./package.nix {
-                #     uid = 1001;
-                #     zig = zig.packages.${pkgs.stdenv.hostPlatform.system}.master;
-                #   };
-                #   entrypoint = pkgs.writeShellScriptBin "setup" ''
-                #     ${lib.getExe pkgs.nix} daemon --trusted >/dev/null 2>&1 &
-
-                #     exec ${lib.getExe execas-github} "$@"
-                #   '';
-                # in
+                let
+                  execas-github = pkgs.callPackage ./package.nix {
+                    uid = 1001;
+                    zig = zig.packages.${pkgs.stdenv.hostPlatform.system}.master;
+                  };
+                in
                 {
-                  Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
+                  Cmd = [ "${lib.getExe' execas-github "bash"}" ];
                   User = "0:0";
                   # WorkingDir = "/github/home";
                   # Entrypoint = [ "${lib.getExe entrypoint}" ];
@@ -505,6 +500,7 @@
                     "USER=root"
                     "PATH=${
                       lib.concatStringsSep ":" [
+                        "${lib.getBin execas-github}/bin"
                         "/root/.nix-profile/bin"
                         "/nix/var/nix/profiles/default/bin"
                         "/nix/var/nix/profiles/default/sbin"
