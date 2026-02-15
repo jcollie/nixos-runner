@@ -43,10 +43,10 @@ jobs:
         run: |
           nix build -L .#nixos-runner
 
-      - name: Push container
-        run: nix run .#push-container -- result
-        env:
-          REGISTRY: ghcr.io
-          REPOSITORY: ${{ github.repository_owner }}/nixos-runner
-          USERNAME: ${{ github.actor }}
-          PASSWORD: ${{ github.token }}
+      # - name: Push container
+      #   run: nix run .#push-container -- result
+      #   env:
+      #     REGISTRY: ghcr.io
+      #     REPOSITORY: ${{ github.repository_owner }}/nixos-runner
+      #     USERNAME: ${{ github.actor }}
+      #     PASSWORD: ${{ github.token }}
