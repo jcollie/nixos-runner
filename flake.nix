@@ -48,24 +48,24 @@
             #     '';
             #   });
             # })
-            (final: prev: {
-              docker_29 = prev.docker_29.override {
-                clientOnly = true;
-              };
-            })
-            (final: prev: {
-              git = prev.git.override {
-                doInstallCheck = false;
-                guiSupport = false;
-                perlSupport = false;
-                pythonSupport = false;
-                svnSupport = false;
-                sendEmailSupport = false;
-                withLibSecret = false;
-                withManual = false;
-                withSsh = false;
-              };
-            })
+            # (final: prev: {
+            #   docker_29 = prev.docker_29.override {
+            #     clientOnly = true;
+            #   };
+            # })
+            # (final: prev: {
+            #   git = prev.git.override {
+            #     doInstallCheck = false;
+            #     guiSupport = false;
+            #     perlSupport = false;
+            #     pythonSupport = false;
+            #     svnSupport = false;
+            #     sendEmailSupport = false;
+            #     withLibSecret = false;
+            #     withManual = false;
+            #     withSsh = false;
+            #   };
+            # })
           ];
         };
       forAllSystems = (
@@ -85,17 +85,17 @@
           # docker-client = pkgs.docker_29.override {
           #   clientOnly = true;
           # };
-          git = pkgs.git.override {
-            doInstallCheck = false;
-            guiSupport = false;
-            perlSupport = false;
-            pythonSupport = false;
-            svnSupport = false;
-            sendEmailSupport = false;
-            withLibSecret = false;
-            withManual = false;
-            withSsh = false;
-          };
+          # git = pkgs.git.override {
+          #   doInstallCheck = false;
+          #   guiSupport = false;
+          #   perlSupport = false;
+          #   pythonSupport = false;
+          #   svnSupport = false;
+          #   sendEmailSupport = false;
+          #   withLibSecret = false;
+          #   withManual = false;
+          #   withSsh = false;
+          # };
           nixos-runner =
             let
               bundleNixpkgs = true;
@@ -107,11 +107,11 @@
                 pkgs.bind.dnsutils
                 pkgs.coreutils-full
                 pkgs.curl
-                pkgs.docker_29
+                pkgs.docker-client
                 pkgs.forgejo-cli
                 pkgs.gawk
                 pkgs.gh
-                pkgs.git
+                pkgs.gitMinimal
                 pkgs.glibc
                 pkgs.gnugrep
                 pkgs.gnused
