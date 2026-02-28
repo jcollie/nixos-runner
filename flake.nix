@@ -517,8 +517,6 @@
                 {
                   Cmd = [ "${lib.getExe' execas-github "bash"}" ];
                   User = "0:0";
-                  # WorkingDir = "/github/home";
-                  # Entrypoint = [ "${lib.getExe entrypoint}" ];
                   Env = [
                     "USER=root"
                     "PATH=${
@@ -545,6 +543,7 @@
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/home/.nix-defexpr/channels"
+                    "MEMORYTEST=${lib.getExe' execas-github "memorytest"}"
                   ];
                 };
             };

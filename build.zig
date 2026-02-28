@@ -91,85 +91,116 @@ pub fn build(b: *std.Build) !void {
     options.addOption([]const u8, "bash", bash);
     options.addOption([]const u8, "sh", sh);
 
-    const execas_exe = b.addExecutable(.{
-        .name = b.fmt("execas-{d}", .{uid}),
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/execas.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
-        .use_llvm = false,
-        .use_lld = false,
-    });
-    execas_exe.root_module.addOptions("options", options);
-    b.installArtifact(execas_exe);
+    {
+        const execas_exe = b.addExecutable(.{
+            .name = b.fmt("execas-{d}", .{uid}),
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/execas.zig"),
+                .target = target,
+                .optimize = optimize,
+            }),
+            .use_llvm = false,
+            .use_lld = false,
+        });
+        execas_exe.root_module.addOptions("options", options);
+        b.installArtifact(execas_exe);
 
-    const execas_tests = b.addTest(.{
-        .root_module = execas_exe.root_module,
-    });
-    const run_execas_tests = b.addRunArtifact(execas_tests);
-    test_step.dependOn(&run_execas_tests.step);
+        const execas_tests = b.addTest(.{
+            .root_module = execas_exe.root_module,
+        });
+        const run_execas_tests = b.addRunArtifact(execas_tests);
+        test_step.dependOn(&run_execas_tests.step);
+    }
 
-    const tail_exe = b.addExecutable(.{
-        .name = "tail",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/tail.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
-        .use_llvm = false,
-        .use_lld = false,
-    });
-    tail_exe.root_module.addOptions("options", options);
+    {
+        const tail_exe = b.addExecutable(.{
+            .name = "tail",
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/tail.zig"),
+                .target = target,
+                .optimize = optimize,
+            }),
+            .use_llvm = false,
+            .use_lld = false,
+        });
+        tail_exe.root_module.addOptions("options", options);
 
-    b.installArtifact(tail_exe);
+        b.installArtifact(tail_exe);
 
-    const tail_tests = b.addTest(.{
-        .root_module = tail_exe.root_module,
-    });
+        const tail_tests = b.addTest(.{
+            .root_module = tail_exe.root_module,
+        });
 
-    const run_tail_tests = b.addRunArtifact(tail_tests);
-    test_step.dependOn(&run_tail_tests.step);
+        const run_tail_tests = b.addRunArtifact(tail_tests);
+        test_step.dependOn(&run_tail_tests.step);
+    }
 
-    const bash_exe = b.addExecutable(.{
-        .name = "bash",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/bash.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
-        .use_llvm = false,
-        .use_lld = false,
-    });
-    bash_exe.root_module.addOptions("options", options);
+    {
+        const bash_exe = b.addExecutable(.{
+            .name = "bash",
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/bash.zig"),
+                .target = target,
+                .optimize = optimize,
+            }),
+            .use_llvm = false,
+            .use_lld = false,
+        });
+        bash_exe.root_module.addOptions("options", options);
 
-    b.installArtifact(bash_exe);
+        b.installArtifact(bash_exe);
 
-    const bash_tests = b.addTest(.{
-        .root_module = bash_exe.root_module,
-    });
+        const bash_tests = b.addTest(.{
+            .root_module = bash_exe.root_module,
+        });
 
-    const run_bash_tests = b.addRunArtifact(bash_tests);
-    test_step.dependOn(&run_bash_tests.step);
+        const run_bash_tests = b.addRunArtifact(bash_tests);
+        test_step.dependOn(&run_bash_tests.step);
+    }
 
-    const sh_exe = b.addExecutable(.{
-        .name = "sh",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/sh.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
-        .use_llvm = false,
-        .use_lld = false,
-    });
-    sh_exe.root_module.addOptions("options", options);
+    {
+        const sh_exe = b.addExecutable(.{
+            .name = "sh",
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/sh.zig"),
+                .target = target,
+                .optimize = optimize,
+            }),
+            .use_llvm = false,
+            .use_lld = false,
+        });
+        sh_exe.root_module.addOptions("options", options);
 
-    b.installArtifact(sh_exe);
+        b.installArtifact(sh_exe);
 
-    const sh_tests = b.addTest(.{
-        .root_module = sh_exe.root_module,
-    });
+        const sh_tests = b.addTest(.{
+            .root_module = sh_exe.root_module,
+        });
 
-    const run_sh_tests = b.addRunArtifact(sh_tests);
-    test_step.dependOn(&run_sh_tests.step);
+        const run_sh_tests = b.addRunArtifact(sh_tests);
+        test_step.dependOn(&run_sh_tests.step);
+    }
+
+    {
+        const memorytest_exe = b.addExecutable(.{
+            .name = "memorytest",
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/memorytest.zig"),
+                .target = target,
+                .optimize = optimize,
+            }),
+            .use_llvm = false,
+            .use_lld = false,
+        });
+        memorytest_exe.root_module.addOptions("options", options);
+
+        b.installArtifact(memorytest_exe);
+
+        const memorytest_tests = b.addTest(.{
+            .root_module = memorytest_exe.root_module,
+        });
+
+        const run_memorytest_tests = b.addRunArtifact(memorytest_tests);
+        test_step.dependOn(&run_memorytest_tests.step);
+    }
 }

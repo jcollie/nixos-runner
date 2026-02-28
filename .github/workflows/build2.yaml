@@ -37,6 +37,10 @@ jobs:
           ls -la $GITHUB_WORKSPACE
           cat /tmp/entrypoint-env.txt || true
 
+      - name: Memory Test
+        run: |
+          $MEMORYTEST
+
       - name: Reuse Lint
         run: |
           nix run .#reuse-lint
