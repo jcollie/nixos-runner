@@ -37,17 +37,13 @@ jobs:
           ls -la $GITHUB_WORKSPACE
           cat /tmp/entrypoint-env.txt || true
 
-      - name: Memory Test
-        run: |
-          $MEMORYTEST
-
       - name: Reuse Lint
         run: |
           nix run .#reuse-lint
 
-      # - name: Build
-      #   run: |
-      #     nix build -L .#nixos-runner
+      - name: Build
+        run: |
+          nix build -L .#nixos-runner
 
       # - name: Push container
       #   run: nix run .#push-container -- result
