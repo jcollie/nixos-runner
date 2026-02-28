@@ -10,8 +10,13 @@ pub fn main(init: std.process.Init) !void {
     const arena: std.mem.Allocator = init.arena.allocator();
     const io = init.io;
 
-    {
-        var t = try std.Io.Dir.openFileAbsolute(io, "/tmp/entrypoint-env.txt", .{ .mode = .read_write });
+    env: {
+        var t = std.Io.Dir.createFileAbsolute(io, "/tmp/entrypoint-env.txt", .{
+            .exclusive = true,
+        }) catch |err| {
+            std.debug.print("unable to create env file: {t}\n", .{err});
+            break :env;
+        };
         defer t.close(io);
         var buf: [64]u8 = undefined;
         var w = t.writer(io, &buf);
