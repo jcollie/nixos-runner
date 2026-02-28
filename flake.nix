@@ -53,17 +53,19 @@
                 clientOnly = true;
               };
             })
-            # (final: prev: {
-            #   git = prev.git.override {
-            #     perlSupport = false;
-            #     pythonSupport = false;
-            #     svnSupport = false;
-            #     sendEmailSupport = false;
-            #     withManual = false;
-            #     withSsh = true;
-            #     openssh = prev.openssh;
-            #   };
-            # })
+            (final: prev: {
+              git = prev.git.override {
+                doInstallCheck = false;
+                guiSupport = false;
+                perlSupport = false;
+                pythonSupport = false;
+                svnSupport = false;
+                sendEmailSupport = false;
+                withLibSecret = false;
+                withManual = false;
+                withSsh = false;
+              };
+            })
           ];
         };
       forAllSystems = (
@@ -84,12 +86,15 @@
           #   clientOnly = true;
           # };
           git = pkgs.git.override {
+            doInstallCheck = false;
+            guiSupport = false;
             perlSupport = false;
             pythonSupport = false;
             svnSupport = false;
             sendEmailSupport = false;
+            withLibSecret = false;
             withManual = false;
-            withSsh = true;
+            withSsh = false;
           };
           nixos-runner =
             let
@@ -106,7 +111,7 @@
                 pkgs.forgejo-cli
                 pkgs.gawk
                 pkgs.gh
-                # pkgs.git
+                pkgs.git
                 pkgs.glibc
                 pkgs.gnugrep
                 pkgs.gnused
@@ -131,7 +136,7 @@
 
                 # self.packages.${pkgs.stdenv.hostPlatform.system}.sudo
                 # self.packages.${pkgs.stdenv.hostPlatform.system}.docker-client
-                self.packages.${pkgs.stdenv.hostPlatform.system}.git
+                # self.packages.${pkgs.stdenv.hostPlatform.system}.git
                 push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
               ];
 
