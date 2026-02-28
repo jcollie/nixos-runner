@@ -40,6 +40,7 @@ pub fn fixupEnvironMap(
         .user => {
             try new.put("USER", options.username);
             try new.put("HOME", "/github/home");
+            try new.put("NIX_REMOTE", "daemon");
         },
     }
 

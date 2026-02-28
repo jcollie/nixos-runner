@@ -543,7 +543,6 @@
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/home/.nix-defexpr/channels"
-                    "NIX_REMOTE=daemon"
                     "MEMORYTEST=${lib.getExe' execas-github "memorytest"}"
                   ];
                 };
