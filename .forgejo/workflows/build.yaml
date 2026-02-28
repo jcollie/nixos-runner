@@ -22,6 +22,13 @@ jobs:
       - name: Reuse Lint
         run: reuse lint
 
+      - name: Debug
+        run: |
+          ps aux
+          ls -l /nix/var/nix/db/big-lock
+          set
+          nix run nixpkgs#hello
+
       - name: Build
         run: nix build -L .#nixos-runner
 
