@@ -119,6 +119,7 @@
                 pkgs.gzip
                 pkgs.iputils
                 pkgs.less
+                pkgs.lsof
                 pkgs.more
                 pkgs.nix
                 pkgs.nodejs_25
@@ -574,6 +575,18 @@
           let
             program = pkgs.writeShellScriptBin "program" ''
               ${pkgs.lib.getExe pkgs.reuse} lint
+            '';
+          in
+          {
+            type = "app";
+            program = "${pkgs.lib.getExe program}";
+          };
+        server =
+          let
+            program = pkgs.writeShellScriptBin "program" ''
+              ${pkgs.lib.getExe pkgs.nix} build -L .#nixos-runner
+              ${pkgs.lib.getExe pkgs.podman} load < result
+              ${pkgs.lib.getExe pkgs.podman} run --rm -it -e CI=true -e GITHUB_ACTIONS=true --entrypoint='["tail", "-f", "/dev/null"]' localhost/nixos-runner:latest
             '';
           in
           {

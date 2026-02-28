@@ -62,6 +62,7 @@ pub fn build(b: *std.Build) !void {
         break :tail try std.fs.path.join(b.allocator, &.{ dir, "tail" });
     };
     const nix = b.option([]const u8, "nix", "real nix binary") orelse try find(b, "nix");
+    const nix_daemon = b.option([]const u8, "nix-daemon", "real nix-daemon binary") orelse try find(b, "nix-daemon");
     const bash = b.option([]const u8, "bash", "real bash binary") orelse try find(b, "bash");
     const sh = sh: {
         const sh = b.option([]const u8, "sh", "real sh binary") orelse try find(b, "sh");
@@ -86,6 +87,7 @@ pub fn build(b: *std.Build) !void {
     options.addOption([]const u8, "homedir", homedir);
     options.addOption([]const u8, "tail", tail);
     options.addOption([]const u8, "nix", nix);
+    options.addOption([]const u8, "nix_daemon", nix_daemon);
     options.addOption([]const u8, "bash", bash);
     options.addOption([]const u8, "sh", sh);
 

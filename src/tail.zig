@@ -31,7 +31,7 @@ pub fn main(init: std.process.Init) !void {
             std.process.setCurrentDir(io, dir) catch break :cwd;
         }
 
-        try lib.exec(init.gpa, options.nix, &.{ "nix", "daemon" }, &environ_map);
+        try lib.exec(init.gpa, options.nix_daemon, &.{ "nix-daemon", "--daemon" }, &environ_map);
         // const err = std.process.replace(io, .{
         //     .argv = &.{
         //         options.nix,

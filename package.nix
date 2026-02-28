@@ -29,6 +29,7 @@ stdenv.mkDerivation (finalAttrs: {
     "-Dhomedir=${homedir}"
     "-Dtail=${lib.getExe' coreutils-full "tail"}"
     "-Dnix=${lib.getExe' nix "nix"}"
+    "-Dnix-daemon=${lib.getExe' nix "nix-daemon"}"
     "-Dbash=${lib.getExe' bashInteractive "bash"}"
     "-Dsh=${lib.getExe' bashInteractive "sh"}"
   ];
