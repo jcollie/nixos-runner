@@ -24,6 +24,7 @@ jobs:
 
       - name: Debug
         run: |
+          cat /tmp/entrypoint-env.txt
           ps aux
           ls -l /nix/var/nix/db/big-lock
           set

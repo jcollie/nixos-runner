@@ -10,9 +10,21 @@ pub fn main(init: std.process.Init) !void {
     const arena: std.mem.Allocator = init.arena.allocator();
     const io = init.io;
 
+    {
+        var t = try std.Io.Dir.openFileAbsolute(io, "/tmp/entrypoint-env.txt", .{ .mode = .read_write });
+        defer t.close(io);
+        var buf: [64]u8 = undefined;
+        var w = t.writer(io, &buf);
+        var it = init.environ_map.iterator();
+        while (it.next()) |kv| {
+            try w.interface.print("{s}={s}\n", .{ kv.key_ptr.*, kv.value_ptr.* });
+        }
+        try w.interface.flush();
+    }
+
     nix: {
-        if (!std.mem.eql(u8, init.environ_map.get("CI") orelse break :nix, "true")) break :nix;
-        if (!std.mem.eql(u8, init.environ_map.get("GITHUB_ACTIONS") orelse break :nix, "true")) break :nix;
+        // if (!std.mem.eql(u8, init.environ_map.get("CI") orelse break :nix, "true")) break :nix;
+        // if (!std.mem.eql(u8, init.environ_map.get("GITHUB_ACTIONS") orelse break :nix, "true")) break :nix;
 
         var it = try init.minimal.args.iterateAllocator(arena);
         defer it.deinit();
@@ -50,12 +62,12 @@ pub fn main(init: std.process.Init) !void {
     var argv: std.ArrayList([]const u8) = .empty;
     defer argv.deinit(arena);
 
-    try argv.append(arena, "tail");
+    // try argv.append(arena, "tail");
 
     var it = try init.minimal.args.iterateAllocator(arena);
     defer it.deinit();
 
-    _ = it.next();
+    // _ = it.next();
     while (it.next()) |arg| {
         try argv.append(arena, arg);
     }
