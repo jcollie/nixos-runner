@@ -483,13 +483,13 @@
 
                 # https://github.com/containerd/containerd/issues/12683
 
-                tmp="$(realpath --relative-to=etc etc/passwd)"
-                rm -f etc/passwd
-                cp "$tmp" etc/passwd
+                # tmp="$(realpath --relative-to=etc etc/passwd)"
+                # rm -f etc/passwd
+                # cp "$tmp" etc/passwd
 
-                tmp="$(realpath --relative-to=etc etc/group)"
-                rm -f etc/group
-                cp "$tmp" etc/group
+                # tmp="$(realpath --relative-to=etc etc/group)"
+                # rm -f etc/group
+                # cp "$tmp" etc/group
               '';
               fakeRootCommands = ''
                 chmod u=rwxt,u=rwx,o=rwx tmp
