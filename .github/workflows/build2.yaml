@@ -35,7 +35,7 @@ jobs:
           ls -la $HOME
           echo $GITHUB_WORKSPACE
           ls -la $GITHUB_WORKSPACE
-          cat /tmp/entrypoint-env.txt
+          cat /tmp/entrypoint-env.txt || true
 
       - name: Reuse Lint
         run: |
