@@ -37,11 +37,6 @@
           inherit system;
           overlays = [
             # (final: prev: {
-            #   util-linux = prev.util-linux.override {
-            #     pamSupport = false;
-            #   };
-            # })
-            # (final: prev: {
             #   nix = prev.nix.overrideAttrs (old: {
             #     postInstall = ''
             #       chmod u+s $out/bin/nix
@@ -246,9 +241,6 @@
               groupContents = (lib.concatStringsSep "\n" (lib.attrValues (lib.mapAttrs groupToGroup groups)));
 
               defaultNixConf = {
-                cores = "1";
-                max-jobs = "1";
-                http-connections = "5";
                 sandbox = "true";
                 build-users-group = "nixbld";
                 trusted-users = [
@@ -481,16 +473,6 @@
               extraCommands = ''
                 rm -rf nix-support
                 ln -s /nix/var/nix/profiles nix/var/nix/gcroots/profiles
-
-                # https://github.com/containerd/containerd/issues/12683
-
-                # tmp="$(realpath --relative-to=etc etc/passwd)"
-                # rm -f etc/passwd
-                # cp "$tmp" etc/passwd
-
-                # tmp="$(realpath --relative-to=etc etc/group)"
-                # rm -f etc/group
-                # cp "$tmp" etc/group
               '';
               fakeRootCommands = ''
                 chmod u=rwxt,u=rwx,o=rwx tmp
@@ -521,7 +503,7 @@
                     "USER=root"
                     "PATH=${
                       lib.concatStringsSep ":" [
-                        "${lib.getBin execas-github}/bin"
+                        # "${lib.getBin execas-github}/bin"
                         "/root/.nix-profile/bin"
                         "/nix/var/nix/profiles/default/bin"
                         "/nix/var/nix/profiles/default/sbin"
@@ -543,7 +525,7 @@
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/home/.nix-defexpr/channels"
-                    "MEMORYTEST=${lib.getExe' execas-github "memorytest"}"
+                    # "MEMORYTEST=${lib.getExe' execas-github "memorytest"}"
                   ];
                 };
             };

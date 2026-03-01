@@ -25,12 +25,7 @@ pub fn main(init: std.process.Init) !void {
 
     try lib.switchToUser();
 
+    lib.chdir(.user);
+
     try lib.exec(init.gpa, options.bash, argv.items, &environ_map);
-
-    // const err = std.process.replace(io, .{
-    //     .argv = argv.items,
-    //     .environ_map = &environ_map,
-    // });
-
-    // std.debug.print("unable to execute: {t}\n", .{err});
 }
