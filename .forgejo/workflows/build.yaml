@@ -22,6 +22,9 @@ jobs:
       - name: Reuse Lint
         run: reuse lint
 
+      - name: Build
+        run: nix build -L .#nixos-runner
+
       - name: Push container to local registry
         run: push-container result
         env:
