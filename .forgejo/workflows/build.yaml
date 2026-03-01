@@ -22,17 +22,6 @@ jobs:
       - name: Reuse Lint
         run: reuse lint
 
-      - name: Debug
-        run: |
-          cat /tmp/entrypoint-env.txt || true
-          ps aux
-          ls -l /nix/var/nix/db/big-lock
-          set
-          nix run nixpkgs#hello
-
-      - name: Build
-        run: nix build -L .#nixos-runner
-
       - name: Push container to local registry
         run: push-container result
         env:

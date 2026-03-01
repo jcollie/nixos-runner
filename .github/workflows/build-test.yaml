@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build2:
+  build-test:
     runs-on: ubuntu-latest
     container: ghcr.io/jcollie/nixos-runner:latest
     permissions:
@@ -26,18 +26,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: test
-        run: |
-          ps aux
-          id
-          whoami
-          set
-          echo $HOME
-          ls -la $HOME
-          echo $GITHUB_WORKSPACE
-          ls -la $GITHUB_WORKSPACE
-          cat /tmp/entrypoint-env.txt || true
-
       - name: Reuse Lint
         run: |
           nix run .#reuse-lint
@@ -45,11 +33,3 @@ jobs:
       - name: Build
         run: |
           nix build -L .#nixos-runner
-
-      # - name: Push container
-      #   run: nix run .#push-container -- result
-      #   env:
-      #     REGISTRY: ghcr.io
-      #     REPOSITORY: ${{ github.repository_owner }}/nixos-runner
-      #     USERNAME: ${{ github.actor }}
-      #     PASSWORD: ${{ github.token }}
