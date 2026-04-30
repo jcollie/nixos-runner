@@ -229,6 +229,7 @@
               groupContents = (lib.concatStringsSep "\n" (lib.attrValues (lib.mapAttrs groupToGroup groups)));
 
               defaultNixConf = {
+                accept-flake-config = false;
                 sandbox = "true";
                 build-users-group = "nixbld";
                 trusted-users = [
@@ -526,7 +527,7 @@
             pkgs.pinact
             pkgs.regctl
             pkgs.reuse
-            zig.packages.${pkgs.stdenv.hostPlatform.system}.master
+            pkgs.zig_0_16
             push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
           ];
 
