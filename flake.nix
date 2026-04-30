@@ -230,19 +230,19 @@
               groupContents = (lib.concatStringsSep "\n" (lib.attrValues (lib.mapAttrs groupToGroup groups)));
 
               defaultNixConf = {
-                accept-flake-config = false;
-                sandbox = "true";
+                accept-flake-config = "false";
                 build-users-group = "nixbld";
+                experimental-features = [
+                  "flakes"
+                  "nix-command"
+                ];
+                sandbox = "true";
                 trusted-users = [
                   "root"
                   "github"
                 ];
                 trusted-public-keys = [
                   "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-                ];
-                experimental-features = [
-                  "flakes"
-                  "nix-command"
                 ];
               };
 
