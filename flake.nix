@@ -100,6 +100,7 @@
                 pkgs.attic-client
                 pkgs.bashInteractive
                 pkgs.bind.dnsutils
+                pkgs.buildkite-agent
                 pkgs.coreutils-full
                 pkgs.curl
                 pkgs.docker-client
