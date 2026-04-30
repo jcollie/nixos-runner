@@ -4,7 +4,7 @@
 {
   lib,
   stdenv,
-  zig,
+  zig_0_16,
   uid,
   gid,
   username,
@@ -19,7 +19,7 @@ stdenv.mkDerivation (finalAttrs: {
   name = "execas-${toString uid}";
   src = lib.cleanSource ./.;
   nativeBuildInputs = [
-    zig
+    zig_0_16
   ];
   zigBuildFlags = [
     "-Duid=${toString uid}"
