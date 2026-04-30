@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: © 2023 Jeffrey C. Ollie -->
+<!-- SPDX-License-Identifier: MIT -->
+
 # NixOS GitHub actions runner
 
 ### Radicle
