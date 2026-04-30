@@ -17,17 +17,14 @@
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
-        ],
-        "zig": [
-          "zig"
         ]
       },
       "locked": {
-        "lastModified": 1771097473,
-        "narHash": "sha256-rdwLgKpTuxXwoYZ+Bb4G3AGWllqsUa0hYebhy7rvRvU=",
+        "lastModified": 1777517109,
+        "narHash": "sha256-vPZd4F2CvD6pqANhmAqtxdvbKAVLAtOmxaQkK9bgcyI=",
         "ref": "refs/heads/main",
-        "rev": "66fddd025358abde9935f8d3398506bc854eeea1",
-        "revCount": 18,
+        "rev": "9f3ee7603870fc65645cc2eb5ab44b028287ff40",
+        "revCount": 19,
         "type": "git",
         "url": "https://git.ocjtech.us/jeff/push-container.git"
       },

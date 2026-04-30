@@ -12,23 +12,14 @@
       url = "git+https://git.ocjtech.us/jeff/push-container.git";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        zig.follows = "zig";
-      };
-    };
-    zig = {
-      url = "git+https://git.ocjtech.us/jeff/zig-overlay.git";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
       };
     };
   };
 
   outputs =
     {
-      self,
       nixpkgs,
       push-container,
-      zig,
     }:
     let
       makePackages =
@@ -126,14 +117,10 @@
                 pkgs.reuse
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
-                pkgs.tailscale
                 pkgs.which
                 pkgs.xz
                 pkgs.zstd
 
-                # self.packages.${pkgs.stdenv.hostPlatform.system}.sudo
-                # self.packages.${pkgs.stdenv.hostPlatform.system}.docker-client
-                # self.packages.${pkgs.stdenv.hostPlatform.system}.git
                 push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
               ];
 
