@@ -107,7 +107,6 @@
                 pkgs.gzip
                 pkgs.iputils
                 pkgs.less
-                pkgs.lsof
                 pkgs.more
                 pkgs.nix
                 pkgs.nodejs_25
