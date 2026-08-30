@@ -389,6 +389,11 @@
 
                     mkdir -p $out/etc/ssl/certs
                     ln -s /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt $out/etc/ssl/certs
+                    # zig's certificate scanner ignores SSL_CERT_FILE and only
+                    # probes fixed paths like /etc/ssl/certs/ca-certificates.crt;
+                    # point that name straight at the store cacert so it can
+                    # never dangle
+                    ln -s ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt $out/etc/ssl/certs/ca-certificates.crt
 
                     cat $passwdContentsPath > $out/etc/passwd
                     echo "" >> $out/etc/passwd
