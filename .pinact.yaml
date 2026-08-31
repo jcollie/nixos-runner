@@ -6,4 +6,3 @@
 version: 3
 files:
   - pattern: .forgejo/workflows/*.yaml
-  - pattern: .github/workflows/*.yaml
