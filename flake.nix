@@ -127,7 +127,7 @@
                 pkgs.iputils
                 pkgs.less
                 pkgs.nix
-                pkgs.nodejs_25
+                pkgs.nodejs_24
                 pkgs.procps
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
