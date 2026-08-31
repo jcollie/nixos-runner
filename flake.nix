@@ -129,14 +129,9 @@
                 pkgs.gzip
                 pkgs.iputils
                 pkgs.less
-                pkgs.more
                 pkgs.nix
                 pkgs.nodejs_25
-                pkgs.nushell
-                pkgs.pinact
-                pkgs.podman
                 pkgs.procps
-                pkgs.reuse
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
                 pkgs.which
@@ -279,52 +274,6 @@
                 ))
                 + "\n";
 
-              containerSettings = ''
-                [engine]
-                init_path = "${pkgs.catatonit}/bin/catatonit"
-                helper_binaries_dir = [ "${pkgs.podman}/libexec/podman" ]
-
-                [network]
-                cni_plugin_dirs = [ "${pkgs.cni-plugins}/bin" ]
-                network_backend = "netavark"
-              '';
-
-              containerStorage = ''
-                [storage]
-                driver = "overlay"
-                graphroot = "/var/lib/containers/storage"
-                runroot = "/run/containers/storage"
-              '';
-
-              containerRegistries = ''
-                [registries]
-                [registries.block]
-                registries = [ ]
-
-                [registries.insecure]
-                registries = [ ]
-
-                [registries.search]
-                registries = [ "docker.io", "quay.io" ]
-              '';
-
-              containerPolicy = builtins.toJSON {
-                default = [
-                  {
-                    type = "insecureAcceptAnything";
-                  }
-                ];
-                transports = {
-                  docker-daemon = {
-                    "" = [
-                      {
-                        type = "insecureAcceptAnything";
-                      }
-                    ];
-                  };
-                };
-              };
-
               gitConfig = ''
                 [safe]
                 ''\tdirectory = *
@@ -382,10 +331,6 @@
                 pkgs.runCommand "base-system"
                   {
                     inherit
-                      containerPolicy
-                      containerRegistries
-                      containerSettings
-                      containerStorage
                       groupContents
                       nixConfContents
                       passwdContents
@@ -393,10 +338,6 @@
                       gitConfig
                       ;
                     passAsFile = [
-                      "containerPolicy"
-                      "containerRegistries"
-                      "containerSettings"
-                      "containerStorage"
                       "groupContents"
                       "nixConfContents"
                       "passwdContents"
@@ -438,15 +379,6 @@
                     mkdir -p $out/nix/var/nix/gcroots
                     mkdir -p $out/tmp
                     mkdir -p $out/var/tmp
-
-                    mkdir -p $out/etc/containers
-                    mkdir -p $out/etc/containers/networks
-                    mkdir -p $out/var/lib/containers/storage
-                    mkdir -p $out/run/containers/storage
-                    cat $containerSettingsPath > $out/etc/containers/containers.conf
-                    cat $containerStoragePath > $out/etc/containers/storage.conf
-                    cat $containerRegistriesPath > $out/etc/containers/registry.conf
-                    cat $containerPolicyPath > $out/etc/containers/policy.json
 
                     mkdir -p $out/nix/var/nix/profiles
                     ln -s ${profile} $out/nix/var/nix/profiles/default-1-link

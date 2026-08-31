@@ -20,7 +20,7 @@ jobs:
           cache: ${{ vars.ATTIC_CACHE }}
 
       - name: Reuse Lint
-        run: reuse lint
+        run: nix run .#reuse-lint
 
       - name: Build
         run: nix build -L .#nixos-runner
