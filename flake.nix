@@ -112,9 +112,6 @@
               defaultPkgs = map stripDocs [
                 pkgs.bashInteractive
                 pkgs.bind.dnsutils
-                # the default `git` here is the full build, which drags in its
-                # 15 MiB `doc` output plus perl; the image already ships gitMinimal
-                (pkgs.buildkite-agent.override { git = pkgs.gitMinimal; })
                 pkgs.cacert
                 pkgs.coreutils-full
                 pkgs.curl
