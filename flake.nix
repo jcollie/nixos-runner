@@ -85,17 +85,42 @@
           # };
           nixos-runner =
             let
-              bundleNixpkgs = true;
+              bundleNixpkgs = false;
               channelName = "nixpkgs";
               channelURL = "https://channels.nixos.org/channels/nixos-unstable";
-              defaultPkgs = [
-                pkgs.attic-client
+
+              # `buildEnv` installs every output listed in `meta.outputsToInstall`,
+              # which for most packages includes `man` (and sometimes `doc`/`info`).
+              # Those outputs are pure documentation that nothing in a CI runner
+              # image ever reads, and pulling them in drags whole store paths into
+              # the image closure. Drop them while keeping whatever else the package
+              # installs by default -- several packages here default to `bin` rather
+              # than `out` (curl, xz, zstd, regctl, dnsutils), so hardcoding
+              # `[ "out" ]` would install the wrong thing.
+              docOutputs = [
+                "devdoc"
+                "doc"
+                "docdev"
+                "info"
+                "man"
+              ];
+              stripDocs =
+                drv:
+                drv
+                // {
+                  meta = (drv.meta or { }) // {
+                    outputsToInstall = lib.subtractLists docOutputs (drv.meta.outputsToInstall or [ "out" ]);
+                  };
+                };
+
+              defaultPkgs = map stripDocs [
                 pkgs.bashInteractive
                 pkgs.bind.dnsutils
-                pkgs.buildkite-agent
+                # the default `git` here is the full build, which drags in its
+                # 15 MiB `doc` output plus perl; the image already ships gitMinimal
+                (pkgs.buildkite-agent.override { git = pkgs.gitMinimal; })
                 pkgs.coreutils-full
                 pkgs.curl
-                pkgs.docker-client
                 pkgs.forgejo-cli
                 pkgs.gawk
                 pkgs.gh
@@ -321,6 +346,14 @@
                   userEnv = pkgs.buildPackages.buildEnv {
                     name = "root-profile-env";
                     paths = defaultPkgs;
+                    # A few packages ship man pages and docs inside their default
+                    # output, where dropping the doc outputs above can't reach them.
+                    # Those store paths stay in the image closure regardless, but
+                    # keep them out of the profile so nothing in the container
+                    # (MANPATH included) surfaces documentation.
+                    postBuild = ''
+                      rm -rf $out/share/man $out/share/doc $out/share/info
+                    '';
                   };
                   manifest = pkgs.buildPackages.runCommand "manifest.nix" { } ''
                     cat > $out <<EOF
