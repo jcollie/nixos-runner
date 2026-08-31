@@ -464,10 +464,7 @@
                     mkdir -p $out/root
                     mkdir -p $out/nix/var/nix/profiles/per-user/root
                     ln -s /nix/var/nix/profiles/default $out/root/.nix-profile
-                    ln -s ${channel} $out/nix/var/nix/profiles/per-user/root/channels-1-link
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
-                    mkdir -p $out/root/.nix-defexpr
-                    ln -s $out/nix/var/nix/profiles/per-user/root/channels $out/root/.nix-defexpr/channels
                     mkdir -p $out/root/.config/git
                     cat $gitConfigPath > $out/root/.config/git/config
 
