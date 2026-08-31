@@ -86,8 +86,6 @@
           nixos-runner =
             let
               bundleNixpkgs = false;
-              channelName = "nixpkgs";
-              channelURL = "https://channels.nixos.org/channels/nixos-unstable";
 
               # `buildEnv` installs every output listed in `meta.outputsToInstall`,
               # which for most packages includes `man` (and sometimes `doc`/`info`).
@@ -470,7 +468,6 @@
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
                     mkdir -p $out/root/.nix-defexpr
                     ln -s $out/nix/var/nix/profiles/per-user/root/channels $out/root/.nix-defexpr/channels
-                    echo "${channelURL} ${channelName}" > $out/root/.nix-channels
                     mkdir -p $out/root/.config/git
                     cat $gitConfigPath > $out/root/.config/git/config
 
@@ -482,7 +479,6 @@
                     ln -s $out/nix/var/nix/profiles/per-user/github/channels-1-link $out/nix/var/nix/profiles/per-user/github/channels
                     mkdir -p $out/github/home/.nix-defexpr
                     ln -s $out/nix/var/nix/profiles/per-user/github/channels $out/github/home/.nix-defexpr/channels
-                    echo "${channelURL} ${channelName}" > $out/github/home/.nix-channels
                     mkdir -p $out/github/home/.config/git
                     cat $gitConfigPath > $out/github/home/.config/git/config
 
@@ -550,7 +546,7 @@
                     "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "GIT_SSL_CAINFO=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
                     "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                    "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/home/.nix-defexpr/channels"
+                    # "NIX_PATH=/nix/var/nix/profiles/per-user/root/channels:/root/home/.nix-defexpr/channels"
                     # "MEMORYTEST=${lib.getExe' execas-github "memorytest"}"
                   ];
                 };
