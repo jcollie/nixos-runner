@@ -245,10 +245,12 @@
               defaultNixConf = {
                 accept-flake-config = "false";
                 build-users-group = "nixbld";
+                cores = "1";
                 experimental-features = [
                   "flakes"
                   "nix-command"
                 ];
+                max-jobs = "1";
                 sandbox = "true";
                 trusted-users = [
                   "root"
