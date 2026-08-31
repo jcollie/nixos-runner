@@ -85,8 +85,6 @@
           # };
           nixos-runner =
             let
-              bundleNixpkgs = false;
-
               # `buildEnv` installs every output listed in `meta.outputsToInstall`,
               # which for most packages includes `man` (and sometimes `doc`/`info`).
               # Those outputs are pure documentation that nothing in a CI runner
@@ -333,14 +331,6 @@
 
               baseSystem =
                 let
-                  nixpkgs = pkgs.path;
-                  channel = pkgs.runCommand "channel-nixos" { inherit bundleNixpkgs; } ''
-                    mkdir $out
-                    if [ "$bundleNixpkgs" ]; then
-                      ln -s ${nixpkgs} $out/nixpkgs
-                      echo "[]" > $out/manifest.nix
-                    fi
-                  '';
                   userEnv = pkgs.buildPackages.buildEnv {
                     name = "root-profile-env";
                     paths = defaultPkgs;
@@ -464,7 +454,6 @@
                     mkdir -p $out/root
                     mkdir -p $out/nix/var/nix/profiles/per-user/root
                     ln -s /nix/var/nix/profiles/default $out/root/.nix-profile
-                    ln -s $out/nix/var/nix/profiles/per-user/root/channels-1-link $out/nix/var/nix/profiles/per-user/root/channels
                     mkdir -p $out/root/.config/git
                     cat $gitConfigPath > $out/root/.config/git/config
 
@@ -472,10 +461,6 @@
                     mkdir -p $out/github/home
                     mkdir -p $out/nix/var/nix/profiles/per-user/github
                     ln -s /nix/var/nix/profiles/default $out/github/home/.nix-profile
-                    ln -s ${channel} $out/nix/var/nix/profiles/per-user/github/channels-1-link
-                    ln -s $out/nix/var/nix/profiles/per-user/github/channels-1-link $out/nix/var/nix/profiles/per-user/github/channels
-                    mkdir -p $out/github/home/.nix-defexpr
-                    ln -s $out/nix/var/nix/profiles/per-user/github/channels $out/github/home/.nix-defexpr/channels
                     mkdir -p $out/github/home/.config/git
                     cat $gitConfigPath > $out/github/home/.config/git/config
 
