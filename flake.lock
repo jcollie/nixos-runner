@@ -17,26 +17,48 @@
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "zon2nix": "zon2nix"
       },
       "locked": {
-        "lastModified": 1777517109,
-        "narHash": "sha256-vPZd4F2CvD6pqANhmAqtxdvbKAVLAtOmxaQkK9bgcyI=",
+        "lastModified": 1790481272,
+        "narHash": "sha256-h1ldGUI37ZuY10DlCFQ91nAgPsejT/fNkQ2EemqjfQU=",
         "ref": "refs/heads/main",
-        "rev": "9f3ee7603870fc65645cc2eb5ab44b028287ff40",
-        "revCount": 19,
+        "rev": "d9845a97d91c52ac41fbdb6e3cb22e27be406f65",
+        "revCount": 24,
         "type": "git",
-        "url": "https://git.ocjtech.us/jeff/push-container.git"
+        "url": "https://git.jcollie.dev/jeff/push-container.git"
       },
       "original": {
         "type": "git",
-        "url": "https://git.ocjtech.us/jeff/push-container.git"
+        "url": "https://git.jcollie.dev/jeff/push-container.git"
       }
     },
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
         "push-container": "push-container"
+      }
+    },
+    "zon2nix": {
+      "inputs": {
+        "nixpkgs": [
+          "push-container",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789872114,
+        "narHash": "sha256-yvn1xRRAR2IHuKqejmngftjBm/x/h/RspOg0ol4B5dw=",
+        "owner": "jcollie",
+        "repo": "zon2nix",
+        "rev": "723bddc9c51c5873965a17f922e4139d587764c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jcollie",
+        "repo": "zon2nix",
+        "type": "github"
       }
     }
   },

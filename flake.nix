@@ -9,7 +9,7 @@
       url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz";
     };
     push-container = {
-      url = "git+https://git.ocjtech.us/jeff/push-container.git";
+      url = "git+https://git.jcollie.dev/jeff/push-container.git";
       inputs = {
         nixpkgs.follows = "nixpkgs";
       };
@@ -91,7 +91,7 @@
               # image ever reads, and pulling them in drags whole store paths into
               # the image closure. Drop them while keeping whatever else the package
               # installs by default -- several packages here default to `bin` rather
-              # than `out` (curl, xz, zstd, regctl, dnsutils), so hardcoding
+              # than `out` (curl, xz, zstd), so hardcoding
               # `[ "out" ]` would install the wrong thing.
               docOutputs = [
                 "devdoc"
@@ -160,28 +160,28 @@
                     disallowedReferences = (old.disallowedReferences or [ ]) ++ [ pkgs.gettext ];
                     postFixup = (old.postFixup or "") + ''
                       remove-references-to -t ${pkgs.gettext} $out/libexec/git-core/git-sh-i18n
+
+                      # git-gui and gitk are Tcl/Tk programs, and gitMinimal
+                      # ships no Tcl/Tk to run them with.
+                      rm -r $out/share/git-gui $out/share/gitk
+                      rm $out/libexec/git-core/{git-citool,git-gui--askpass,git-gui--askyesno}
                     '';
                   });
 
               defaultPkgs = map stripDocs [
                 pkgs.bashInteractive
-                pkgs.bind.dnsutils
                 pkgs.cacert
                 pkgs.coreutils
                 pkgs.curl
                 pkgs.gawk
                 git
-                pkgs.glibc
                 pkgs.gnugrep
                 pkgs.gnused
                 pkgs.gnutar
                 pkgs.gzip
-                pkgs.iputils
                 pkgs.less
                 pkgs.nix
                 nodejs
-                pkgs.procps
-                pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
                 pkgs.which
                 pkgs.xz
@@ -527,7 +527,6 @@
           nativeBuildInputs = [
             pkgs.gzip
             pkgs.pinact
-            pkgs.regctl
             pkgs.reuse
             pkgs.zig_0_16
             push-container.packages.${pkgs.stdenv.hostPlatform.system}.push-container
