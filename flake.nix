@@ -109,16 +109,68 @@
                   };
                 };
 
+              # nodejs_24 is nodejs-slim plus npm and corepack. nodejs-slim
+              # records its configure flags twice -- in the headers it ships for
+              # building native addons, and inside the binary as
+              # `process.config` -- and those flags name the `dev` output of
+              # every library node was built against: icu4c, openssl, gtest and
+              # a dozen more, none of which a running node ever loads. Copy what
+              # node needs at run time into a single tree without the headers,
+              # blank the `dev` paths and node's own install prefix in the
+              # binary (`process.config` is informational only), and point npm's
+              # shebangs at the copy, so that nodejs-slim and everything its
+              # build flags drag along drop out of the closure.
+              nodejs =
+                pkgs.runCommand "nodejs-runtime-${pkgs.nodejs_24.version}"
+                  {
+                    nativeBuildInputs = [ pkgs.removeReferencesTo ];
+                    disallowedReferences = [ pkgs.nodejs-slim_24 ];
+                  }
+                  ''
+                    mkdir -p $out/bin
+                    cp -L ${pkgs.nodejs_24}/bin/node $out/bin/node
+                    chmod u+w $out/bin/node
+                    remove-references-to -t ${pkgs.nodejs-slim_24} $out/bin/node
+                    grep -aoE '${builtins.storeDir}/[a-z0-9]{32}-[^/"]+-dev' $out/bin/node \
+                      | sort -u \
+                      | while read -r dev; do remove-references-to -t "$dev" $out/bin/node; done
+                    cp -P ${pkgs.nodejs_24}/bin/{npm,npx,corepack} $out/bin/
+                    cp -rL ${pkgs.nodejs_24}/lib $out/lib
+                    chmod -R u+w $out
+                    grep -rlF ${pkgs.nodejs-slim_24} $out/lib \
+                      | xargs -r sed -i "s|${pkgs.nodejs-slim_24}|$out|g"
+                  '';
+
+              # git without its translations: those are 13 MB of message
+              # catalogs in git itself plus gettext, another 25 MB, and nothing
+              # in CI reads git's output in anything but English. This is the
+              # one package here that is built rather than substituted.
+              #
+              # nixpkgs still hardcodes gettext.sh into `git-sh-i18n`, but built
+              # without NLS that script pins itself to the English-only
+              # "fallthrough" scheme before the branch naming gettext.sh can be
+              # reached, so the reference is dead and can be blanked.
+              git =
+                (pkgs.gitMinimal.override {
+                  nlsSupport = false;
+                  doInstallCheck = false;
+                }).overrideAttrs
+                  (old: {
+                    nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.removeReferencesTo ];
+                    disallowedReferences = (old.disallowedReferences or [ ]) ++ [ pkgs.gettext ];
+                    postFixup = (old.postFixup or "") + ''
+                      remove-references-to -t ${pkgs.gettext} $out/libexec/git-core/git-sh-i18n
+                    '';
+                  });
+
               defaultPkgs = map stripDocs [
                 pkgs.bashInteractive
                 pkgs.bind.dnsutils
                 pkgs.cacert
-                pkgs.coreutils-full
+                pkgs.coreutils
                 pkgs.curl
-                pkgs.forgejo-cli
                 pkgs.gawk
-                pkgs.gh
-                pkgs.gitMinimal
+                git
                 pkgs.glibc
                 pkgs.gnugrep
                 pkgs.gnused
@@ -127,7 +179,7 @@
                 pkgs.iputils
                 pkgs.less
                 pkgs.nix
-                pkgs.nodejs_24
+                nodejs
                 pkgs.procps
                 pkgs.regctl
                 pkgs.stdenv.cc.cc.lib
@@ -161,7 +213,9 @@
                 };
                 nobody = {
                   uid = 65534;
-                  shell = "${pkgs.shadow}/bin/nologin";
+                  # Not shadow's nologin: that would pull shadow, linux-pam and
+                  # berkeley db into the image for one program that is never run.
+                  shell = "${pkgs.coreutils}/bin/false";
                   home = "/var/empty";
                   gid = 65534;
                   groups = [ "nobody" ];

@@ -10,7 +10,7 @@
   username,
   homedir,
   groups,
-  coreutils-full,
+  coreutils,
   bashInteractive,
   nix,
   ...
@@ -22,12 +22,13 @@ stdenv.mkDerivation (finalAttrs: {
     zig_0_16
   ];
   zigBuildFlags = [
+    "-Dstrip=true"
     "-Duid=${toString uid}"
     "-Dgid=${toString gid}"
     "-Dgroups=${groups}"
     "-Dusername=${username}"
     "-Dhomedir=${homedir}"
-    "-Dtail=${lib.getExe' coreutils-full "tail"}"
+    "-Dtail=${lib.getExe' coreutils "tail"}"
     "-Dnix=${lib.getExe' nix "nix"}"
     "-Dnix-daemon=${lib.getExe' nix "nix-daemon"}"
     "-Dbash=${lib.getExe' bashInteractive "bash"}"

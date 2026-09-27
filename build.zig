@@ -47,6 +47,7 @@ pub fn find(b: *std.Build, name: []const u8) ![]const u8 {
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const strip = b.option(bool, "strip", "strip debug information from the executables");
 
     const test_step = b.step("test", "Run tests");
 
@@ -98,6 +99,7 @@ pub fn build(b: *std.Build) !void {
                 .root_source_file = b.path("src/execas.zig"),
                 .target = target,
                 .optimize = optimize,
+                .strip = strip,
             }),
             .use_llvm = false,
             .use_lld = false,
@@ -119,6 +121,7 @@ pub fn build(b: *std.Build) !void {
                 .root_source_file = b.path("src/tail.zig"),
                 .target = target,
                 .optimize = optimize,
+                .strip = strip,
             }),
             .use_llvm = false,
             .use_lld = false,
@@ -142,6 +145,7 @@ pub fn build(b: *std.Build) !void {
                 .root_source_file = b.path("src/bash.zig"),
                 .target = target,
                 .optimize = optimize,
+                .strip = strip,
             }),
             .use_llvm = false,
             .use_lld = false,
@@ -165,6 +169,7 @@ pub fn build(b: *std.Build) !void {
                 .root_source_file = b.path("src/sh.zig"),
                 .target = target,
                 .optimize = optimize,
+                .strip = strip,
             }),
             .use_llvm = false,
             .use_lld = false,
@@ -188,6 +193,7 @@ pub fn build(b: *std.Build) !void {
                 .root_source_file = b.path("src/memorytest.zig"),
                 .target = target,
                 .optimize = optimize,
+                .strip = strip,
             }),
             .use_llvm = false,
             .use_lld = false,
