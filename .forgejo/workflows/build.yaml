@@ -2,11 +2,15 @@
 # SPDX-License-Identifier: MIT
 
 name: build nixos-runner
+
 on:
-  - push
+  push:
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: nixos-do-m
+    enable-openid-connect: true
     steps:
       - name: Checkout code
         uses: https://code.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -32,3 +36,9 @@ jobs:
       #     REPOSITORY: ${{ vars.DOCKER_USERNAME }}/nixos-runner
       #     USERNAME: ${{ vars.DOCKER_USERNAME }}
       #     PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to the cache
+        if: ${{ !cancelled() && forge.ref == 'refs/heads/main' }}
+        uses: https://git.jcollie.dev/jeff/niks3-push@3f85f501658e379783381291241c6f8315a92716
+        with:
+          server-url: https://niks3.jcollie.dev
